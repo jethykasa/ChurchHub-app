@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<meta name="theme-color" content="#07070f"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="ChurchHub"/>
+<meta name="description" content="ChurchHub — Your Church Community App"/>
+<link rel="manifest" href="manifest.json"/>
+<title>ChurchHub</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;0,900;1,400;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════
+   CSS VARIABLES & RESET
+═══════════════════════════════════════════════ */
+:root{
+  --gold:#c8a951;--gold-l:#f0d484;--gold-d:#7a5200;--gold-pale:#fff8e7;
+  --purple:#2c0a5e;--purple-m:#3d1480;--purple-s:#5a2fa0;
+  --blue:#0d2e6e;--blue-b:#1a4dbf;--blue-s:#1e6bdc;
+  --black:#07070f;--ob:#13131f;
+  --white:#fff;--ow:#f8f6ff;--cream:#fdfbf5;
+  --muted:#7a7a9a;--border:rgba(200,169,81,.15);
+  --card:#fff;
+  --shadow:0 6px 28px rgba(7,7,15,.13);
+  --shadow-lg:0 14px 50px rgba(7,7,15,.22);
+  --r:18px;--rs:12px;
+  --trans:280ms;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;font-family:'Outfit',sans-serif;background:var(--ow);color:var(--ob);overflow:hidden;}
+
+/* ═══════════════════════════════════════════════
+   SPLASH SCREEN
+═══════════════════════════════════════════════ */
+#splash{
+  position:fixed;inset:0;z-index:9999;background:var(--black);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+#splash.exit{animation:splashExit .45s cubic-bezier(.4,0,1,1) forwards;}
+@keyframes splashExit{to{opacity:0;transform:scale(1.06);pointer-events:none;}}
+
+.sp-wrap{position:relative;width:90px;height:90px;margin-bottom:22px;}
+.sp-v{position:absolute;left:50%;top:0;transform:translateX(-50%);width:13px;height:0;background:linear-gradient(180deg,var(--gold-l),var(--gold));border-radius:6px;animation:spV .5s cubic-bezier(.34,1.3,.64,1) .3s forwards;}
+.sp-h{position:absolute;top:28px;left:0;height:13px;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-l));border-radius:6px;animation:spH .4s cubic-bezier(.34,1.3,.64,1) .75s forwards;}
+.sp-glow{position:absolute;inset:-14px;border-radius:50%;background:radial-gradient(circle,rgba(200,169,81,.22),transparent 70%);opacity:0;animation:spGlow 1.6s ease .9s infinite alternate;}
+.sp-ring{position:absolute;inset:-15px;border-radius:50%;border:2px solid var(--gold);opacity:0;animation:spRing .6s ease 1s forwards;}
+@keyframes spV{to{height:90px;}}
+@keyframes spH{to{width:90px;}}
+@keyframes spGlow{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:scale(1.1);}}
+@keyframes spRing{0%{opacity:0;transform:scale(.6);}100%{opacity:.5;transform:scale(1);}}
+
+.sp-dots{position:absolute;inset:0;}
+.sp-dot{position:absolute;width:3px;height:3px;border-radius:50%;background:var(--gold-l);opacity:0;animation:spDot ease-in-out infinite;}
+@keyframes spDot{0%,100%{opacity:0;transform:translateY(0);}50%{opacity:.7;transform:translateY(-36px);}}
+
+.sp-word{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,var(--gold-l),var(--gold),#a07820);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;opacity:0;transform:translateY(14px);animation:spWord .35s cubic-bezier(.2,0,0,1) 1.3s forwards;}
+.sp-tag{color:rgba(255,255,255,.28);font-size:10px;letter-spacing:4px;text-transform:uppercase;margin-top:5px;opacity:0;animation:spWord .35s ease 1.5s forwards;}
+.sp-bar{width:0;height:1.5px;border-radius:2px;margin-top:20px;background:linear-gradient(90deg,transparent,var(--gold-l),var(--gold),var(--gold-l),transparent);animation:spBar .5s ease 1.7s forwards;}
+@keyframes spWord{to{opacity:1;transform:translateY(0);}}
+@keyframes spBar{to{width:130px;}}
+
+/* ═══════════════════════════════════════════════
+   AUTH SCREEN
+═══════════════════════════════════════════════ */
+#auth{
+  position:fixed;inset:0;z-index:500;overflow-y:auto;
+  background:linear-gradient(150deg,var(--black) 0%,var(--purple) 50%,var(--blue) 100%);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;
+  opacity:0;transition:opacity .35s ease,transform .35s ease;transform:translateY(16px);
+}
+#auth.show{opacity:1;transform:none;}
+#auth.hide{opacity:0;transform:scale(1.04);pointer-events:none;transition:opacity .22s,transform .22s;}
+.auth-logo{width:58px;height:58px;margin-bottom:14px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1) .1s both;}
+@keyframes popIn{from{transform:scale(0) rotate(-20deg);opacity:0;}to{transform:none;opacity:1;}}
+.auth-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:900;color:var(--gold-l);margin-bottom:3px;letter-spacing:1px;}
+.auth-sub{color:rgba(255,255,255,.32);font-size:11px;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:22px;}
+.auth-tabs{display:flex;background:rgba(255,255,255,.07);border-radius:12px;padding:3px;margin-bottom:18px;width:100%;max-width:340px;}
+.at{flex:1;padding:9px;text-align:center;border-radius:9px;cursor:pointer;font-size:13px;font-weight:600;color:rgba(255,255,255,.38);transition:all .2s;}
+.at.on{background:var(--gold);color:var(--black);transform:scale(1.02);}
+.auth-card{background:rgba(255,255,255,.06);border:1px solid rgba(200,169,81,.13);border-radius:var(--r);padding:22px;width:100%;max-width:340px;backdrop-filter:blur(10px);}
+.auth-card h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:white;margin-bottom:14px;}
+.afl{font-size:11px;font-weight:700;color:rgba(255,255,255,.32);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block;}
+.afi{width:100%;padding:11px 14px;border-radius:10px;border:1.5px solid rgba(255,255,255,.1);font-family:'Outfit',sans-serif;font-size:13px;color:white;background:rgba(255,255,255,.06);outline:none;margin-bottom:11px;transition:border-color .2s,transform .15s;}
+.afi:focus{border-color:var(--gold);transform:translateX(2px);}
+.afi::placeholder{color:rgba(255,255,255,.2);}
+.afi option{background:#1a1030;color:white;}
+.auth-btn{width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;margin-top:4px;transition:transform .12s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;}
+.auth-btn:active{transform:scale(.96);}
+.auth-note{color:rgba(255,255,255,.26);font-size:11px;text-align:center;margin-top:12px;line-height:1.7;}
+.auth-note b{color:var(--gold);cursor:pointer;}
+
+/* ═══════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════ */
+#app{height:100dvh;display:none;flex-direction:column;overflow:hidden;}
+#app.show{display:flex;}
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+.hdr{background:var(--black);padding:9px 14px 8px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;border-bottom:1px solid var(--border);z-index:10;animation:hdrIn .3s ease;}
+@keyframes hdrIn{from{transform:translateY(-100%);opacity:0;}to{transform:none;opacity:1;}}
+.hdr-brand{display:flex;align-items:center;gap:9px;}
+.hdr-logo{width:32px;height:32px;}
+.hdr-name{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:900;background:linear-gradient(135deg,var(--gold-l),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1px;}
+.hdr-sub{font-size:8px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.2);margin-top:1px;}
+.hdr-right{display:flex;align-items:center;gap:7px;}
+.hdr-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--gold);cursor:pointer;border:1.5px solid var(--border);font-family:'Cormorant Garamond',serif;transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.hdr-av:active{transform:scale(.85);}
+.admin-badge{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);font-size:9px;font-weight:700;padding:2px 7px;border-radius:8px;letter-spacing:.5px;}
+.hdr-gear{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(200,169,81,.18);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.hdr-gear:active{transform:rotate(90deg) scale(.85);}
+
+/* ═══════════════════════════════════════════════
+   BOTTOM TABS
+═══════════════════════════════════════════════ */
+.tabs{display:flex;background:var(--ob);border-top:1px solid rgba(200,169,81,.1);overflow-x:auto;flex-shrink:0;scrollbar-width:none;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:52px;padding:6px 2px 8px;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:transparent;cursor:pointer;color:rgba(255,255,255,.26);font-size:8px;letter-spacing:.3px;text-transform:uppercase;font-family:'Outfit',sans-serif;font-weight:600;transition:color .2s;position:relative;}
+.tab .ti{font-size:17px;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.tab.active{color:var(--gold);}
+.tab.active .ti{transform:scale(1.22) translateY(-1px);}
+.tab::after{content:'';position:absolute;bottom:0;left:28%;right:28%;height:2px;background:var(--gold);border-radius:2px 2px 0 0;transform:scaleX(0);transition:transform .22s cubic-bezier(.4,0,.2,1);}
+.tab.active::after{transform:scaleX(1);}
+.tab:active .ti{transform:scale(.82);}
+
+/* ═══════════════════════════════════════════════
+   PAGE TRANSITIONS
+═══════════════════════════════════════════════ */
+.content{flex:1;overflow:hidden;position:relative;}
+.page{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding-bottom:28px;will-change:transform,opacity;opacity:0;pointer-events:none;transform:translateX(60px);}
+.page::-webkit-scrollbar{width:3px;}
+.page::-webkit-scrollbar-thumb{background:var(--purple-s);border-radius:3px;}
+.page.active{opacity:1;pointer-events:auto;transform:translateX(0);transition:transform var(--trans) cubic-bezier(.2,0,0,1),opacity var(--trans) ease;}
+.page.exit-l{opacity:0;pointer-events:none;transform:translateX(-40px);transition:transform var(--trans) cubic-bezier(.4,0,1,1),opacity calc(var(--trans)*.8) ease;}
+.page.exit-r{opacity:0;pointer-events:none;transform:translateX(60px);transition:transform var(--trans) cubic-bezier(.4,0,1,1),opacity calc(var(--trans)*.8) ease;}
+.page.enter-r{transform:translateX(60px);opacity:0;}
+.page.enter-l{transform:translateX(-40px);opacity:0;}
+
+/* ═══════════════════════════════════════════════
+   STAGGER ANIMATIONS
+═══════════════════════════════════════════════ */
+.si{opacity:0;transform:translateY(18px);animation:staggerIn .3s cubic-bezier(.2,0,0,1) forwards;}
+@keyframes staggerIn{to{opacity:1;transform:none;}}
+.si:nth-child(1){animation-delay:.04s;}.si:nth-child(2){animation-delay:.09s;}.si:nth-child(3){animation-delay:.14s;}.si:nth-child(4){animation-delay:.19s;}.si:nth-child(5){animation-delay:.24s;}.si:nth-child(6){animation-delay:.29s;}.si:nth-child(7){animation-delay:.34s;}.si:nth-child(8){animation-delay:.39s;}
+
+/* ═══════════════════════════════════════════════
+   RIPPLE
+═══════════════════════════════════════════════ */
+.rip{position:relative;overflow:hidden;}
+.rip::after{content:'';position:absolute;width:0;height:0;border-radius:50%;background:rgba(255,255,255,.22);top:50%;left:50%;transform:translate(-50%,-50%);transition:width .4s ease,height .4s ease,opacity .4s ease;opacity:0;}
+.rip:active::after{width:200px;height:200px;opacity:1;}
+
+/* ═══════════════════════════════════════════════
+   ADMIN BAR
+═══════════════════════════════════════════════ */
+.ab{background:linear-gradient(90deg,rgba(200,169,81,.1),rgba(200,169,81,.04));border-bottom:1px solid rgba(200,169,81,.18);padding:7px 14px;display:none;align-items:center;justify-content:space-between;}
+.ab.show{display:flex;}
+.ab span{font-size:11px;color:var(--gold);font-weight:600;}
+.ab-btn{background:var(--gold);color:var(--black);border:none;border-radius:8px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.ab-btn:active{transform:scale(.88);}
+
+/* ═══════════════════════════════════════════════
+   PAGE BANNERS
+═══════════════════════════════════════════════ */
+.pgb{padding:20px 16px 24px;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--black) 0%,var(--purple) 50%,var(--blue) 100%);}
+.pgb::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 85% 10%,rgba(200,169,81,.18),transparent 55%);}
+.pgb h2{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;color:white;position:relative;}
+.pgb p{color:rgba(255,255,255,.38);font-size:12px;margin-top:3px;position:relative;}
+.pgb .dc{position:absolute;right:-8px;top:50%;transform:translateY(-50%);font-size:90px;opacity:.04;color:white;font-family:'Cormorant Garamond',serif;font-weight:900;pointer-events:none;}
+
+/* ═══════════════════════════════════════════════
+   ── HOME PAGE ──
+═══════════════════════════════════════════════ */
+/* Ticker */
+.ticker-wrap{background:linear-gradient(90deg,var(--purple),var(--blue));padding:7px 0;overflow:hidden;white-space:nowrap;}
+.ticker{display:inline-flex;animation:tickerAnim 24s linear infinite;}
+.ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 22px;font-size:11px;font-weight:600;color:rgba(255,255,255,.75);letter-spacing:.3px;}
+.ticker-item .td{color:var(--gold);font-size:13px;}
+@keyframes tickerAnim{0%{transform:translateX(0);}100%{transform:translateX(-50%);}}
+
+/* Hero */
+.hero{background:var(--black);min-height:310px;display:flex;flex-direction:column;justify-content:flex-end;position:relative;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(44,10,94,.9),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(13,46,110,.8),transparent 55%),radial-gradient(ellipse at 60% 80%,rgba(26,77,191,.5),transparent 50%),linear-gradient(160deg,#0a0518,#0d1a3a);}
+.orb{position:absolute;border-radius:50%;filter:blur(40px);animation:orbF linear infinite;pointer-events:none;}
+.o1{width:180px;height:180px;background:rgba(44,10,94,.7);top:-40px;left:-30px;animation-duration:12s;}
+.o2{width:140px;height:140px;background:rgba(200,169,81,.1);top:20px;right:-20px;animation-duration:9s;animation-delay:-3s;}
+.o3{width:110px;height:110px;background:rgba(13,46,110,.6);bottom:40px;left:35%;animation-duration:15s;animation-delay:-6s;}
+@keyframes orbF{0%{transform:translate(0,0) scale(1);}33%{transform:translate(12px,-16px) scale(1.06);}66%{transform:translate(-8px,10px) scale(.94);}100%{transform:translate(0,0) scale(1);}}
+.stars-wrap{position:absolute;inset:0;overflow:hidden;}
+.star{position:absolute;width:2px;height:2px;border-radius:50%;background:var(--gold-l);opacity:0;animation:twinkle ease-in-out infinite;}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.5);}50%{opacity:.6;transform:scale(1.2);}}
+.hero-cross{position:absolute;right:14px;top:50%;transform:translateY(-50%);opacity:.05;animation:crossSpin 40s linear infinite;}
+@keyframes crossSpin{to{transform:translateY(-50%) rotate(360deg);}}
+.hero-content{position:relative;z-index:2;padding:26px 16px 0;}
+.hero-greet{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:6px;display:flex;align-items:center;gap:6px;animation:slideL .5s cubic-bezier(.2,0,0,1) .1s both;}
+.hero-greet::before{content:'';width:18px;height:1.5px;background:var(--gold);border-radius:1px;}
+@keyframes slideL{from{opacity:0;transform:translateX(-18px);}to{opacity:1;transform:none;}}
+.hero-title{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:900;color:white;line-height:1.1;margin-bottom:4px;animation:slideL .5s cubic-bezier(.2,0,0,1) .2s both;}
+.hero-title span{background:linear-gradient(135deg,var(--gold-l),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-sub{font-size:12px;color:rgba(255,255,255,.35);letter-spacing:1px;margin-bottom:18px;animation:slideL .5s cubic-bezier(.2,0,0,1) .3s both;}
+.live-stats{display:flex;background:rgba(0,0,0,.25);animation:fadeUp .5s ease .4s both;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:none;}}
+.ls{flex:1;text-align:center;padding:13px 6px;border-right:1px solid rgba(255,255,255,.07);}
+.ls:last-child{border-right:none;}
+.ls-n{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);line-height:1;}
+.ls-l{font-size:9px;color:rgba(255,255,255,.32);text-transform:uppercase;letter-spacing:.7px;margin-top:2px;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:#22c55e;display:inline-block;margin-right:3px;animation:ldot 1.2s ease infinite;}
+@keyframes ldot{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.5);opacity:.5;}}
+.shimmer{height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--gold-l),var(--gold),transparent);background-size:200% 100%;animation:shimmer 2.5s linear infinite;}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* Verse card */
+.verse-card{margin:14px 16px 0;background:linear-gradient(135deg,rgba(200,169,81,.1),rgba(200,169,81,.05));border:1px solid rgba(200,169,81,.22);border-radius:var(--r);padding:15px 17px;position:relative;overflow:hidden;}
+.verse-card::before{content:'"';position:absolute;top:-12px;left:10px;font-family:'Cormorant Garamond',serif;font-size:80px;font-weight:900;color:rgba(200,169,81,.12);line-height:1;pointer-events:none;}
+.vc-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:6px;}
+.vc-text{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--ob);line-height:1.55;margin-bottom:7px;font-style:italic;transition:opacity .3s ease,transform .3s ease;}
+.vc-ref{font-size:11px;font-weight:700;color:var(--purple);letter-spacing:.5px;}
+.vc-dots{display:flex;gap:5px;margin-top:9px;}
+.vd{width:6px;height:6px;border-radius:50%;background:#ddd;cursor:pointer;transition:all .2s;}
+.vd.on{background:var(--gold);width:18px;border-radius:3px;}
+
+/* Service spotlight */
+.ss-card{margin:12px 16px 0;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:var(--r);padding:16px 17px;position:relative;overflow:hidden;}
+.ss-card::after{content:'⛪';position:absolute;right:-8px;bottom:-10px;font-size:75px;opacity:.07;pointer-events:none;}
+.ss-lbl{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:5px;display:flex;align-items:center;gap:5px;}
+.ss-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:white;margin-bottom:3px;}
+.ss-spk{font-size:12px;color:rgba(255,255,255,.45);margin-bottom:10px;}
+.ss-chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px;}
+.ss-chip{background:rgba(255,255,255,.1);border-radius:20px;padding:4px 10px;font-size:11px;color:rgba(255,255,255,.7);}
+.countdown{display:flex;gap:8px;margin-bottom:12px;}
+.cd{text-align:center;background:rgba(0,0,0,.2);border-radius:10px;padding:7px 8px;min-width:44px;}
+.cd-n{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:var(--gold);line-height:1;}
+.cd-l{font-size:8px;text-transform:uppercase;letter-spacing:.7px;color:rgba(255,255,255,.3);margin-top:1px;}
+.ss-btns{display:flex;gap:8px;}
+.ss-btn{padding:9px 16px;border-radius:11px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:'Outfit',sans-serif;transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.ss-btn:active{transform:scale(.91);}
+.ss-btn.pr{background:linear-gradient(135deg,var(--gold),var(--gold-l));color:var(--black);}
+.ss-btn.gh{background:rgba(255,255,255,.1);color:white;border:1px solid rgba(255,255,255,.15);}
+
+/* Section headers */
+.sh{padding:16px 16px 9px;display:flex;align-items:center;justify-content:space-between;}
+.sh-title{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--purple);}
+.sh-all{font-size:11px;color:var(--gold-d);font-weight:700;cursor:pointer;}
+
+/* Announcement cards */
+.hscroll{display:flex;gap:11px;padding:0 16px 4px;overflow-x:auto;scrollbar-width:none;}
+.hscroll::-webkit-scrollbar{display:none;}
+.ann-card{width:220px;flex-shrink:0;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s;animation:cardPop .4s cubic-bezier(.34,1.56,.64,1) both;}
+.ann-card:nth-child(1){animation-delay:.04s;}.ann-card:nth-child(2){animation-delay:.1s;}.ann-card:nth-child(3){animation-delay:.16s;}
+@keyframes cardPop{from{opacity:0;transform:scale(.88) translateY(10px);}to{opacity:1;transform:none;}}
+.ann-card:active{transform:scale(.94);box-shadow:0 2px 10px rgba(7,7,15,.1);}
+.ac-img{height:88px;display:flex;align-items:center;justify-content:center;font-size:34px;position:relative;}
+.ac-badge{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.45);color:white;font-size:9px;font-weight:700;padding:2px 7px;border-radius:14px;letter-spacing:.5px;}
+.ac-body{background:white;padding:11px 13px 13px;}
+.ac-tag{display:inline-block;padding:2px 9px;border-radius:20px;font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;margin-bottom:6px;}
+.ac-title{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;color:var(--ob);margin-bottom:4px;line-height:1.3;}
+.ac-meta{font-size:10px;color:var(--muted);}
+
+/* Quick access grid */
+.qa-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px;}
+.qa{border-radius:var(--r);padding:15px 13px;cursor:pointer;box-shadow:var(--shadow);color:white;transition:transform .15s cubic-bezier(.34,1.56,.64,1),box-shadow .15s;position:relative;overflow:hidden;}
+.qa::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.06),transparent);pointer-events:none;}
+.qa:active{transform:scale(.93) rotate(-.5deg);box-shadow:0 2px 10px rgba(7,7,15,.1);}
+.qa-iw{width:38px;height:38px;border-radius:11px;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:19px;margin-bottom:9px;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.qa:active .qa-iw{transform:scale(.84) rotate(-5deg);}
+.qa-l{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;line-height:1.2;}
+.qa-s{font-size:10px;opacity:.42;margin-top:2px;}
+.qa-arr{position:absolute;top:13px;right:13px;font-size:15px;opacity:.28;}
+.qa.wide{grid-column:span 2;display:flex;align-items:center;gap:13px;padding:13px 15px;}
+.qa.wide .qa-iw{margin-bottom:0;flex-shrink:0;}
+
+/* Birthday strip */
+.bday-strip{margin:12px 16px 0;background:linear-gradient(135deg,#7a5200,var(--gold));border-radius:16px;padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;box-shadow:0 4px 20px rgba(200,169,81,.28);transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.bday-strip:active{transform:scale(.96);}
+.bday-avs{display:flex;}
+.bday-av{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;font-family:'Cormorant Garamond',serif;border:2px solid rgba(255,255,255,.28);margin-left:-7px;}
+.bday-av:first-child{margin-left:0;}
+.bday-txt{flex:1;}
+.bday-title{font-weight:700;font-size:13px;color:white;}
+.bday-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:1px;}
+.bday-ic{font-size:26px;animation:bdB 1s ease infinite alternate;}
+@keyframes bdB{from{transform:translateY(0) rotate(-5deg);}to{transform:translateY(-4px) rotate(5deg);}}
+
+/* Testimony peek */
+.test-peek{margin:12px 16px 0;background:white;border-radius:var(--r);padding:15px;box-shadow:var(--shadow);border-left:4px solid var(--gold);cursor:pointer;transition:transform .15s cubic-bezier(.2,0,0,1);}
+.test-peek:active{transform:scale(.98);}
+.tp-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--gold-d);font-weight:700;margin-bottom:5px;}
+.tp-q{font-family:'Cormorant Garamond',serif;font-size:14px;font-style:italic;color:var(--ob);line-height:1.6;margin-bottom:7px;}
+.tp-auth{font-size:11px;font-weight:700;color:var(--purple);}
+
+/* Prayer pulse */
+.pp-strip{margin:12px 16px 0;background:linear-gradient(135deg,rgba(44,10,94,.06),rgba(13,46,110,.04));border:1px solid rgba(44,10,94,.1);border-radius:var(--r);padding:13px 15px;display:flex;align-items:center;gap:11px;cursor:pointer;transition:transform .15s cubic-bezier(.2,0,0,1);}
+.pp-strip:active{transform:scale(.98);}
+.pp-icon{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;animation:ppPulse 2s ease infinite;}
+@keyframes ppPulse{0%,100%{box-shadow:0 0 0 0 rgba(44,10,94,.3);}50%{box-shadow:0 0 0 8px rgba(44,10,94,.0);}}
+.pp-t{font-weight:700;font-size:14px;color:var(--purple);}
+.pp-s{font-size:11px;color:var(--muted);margin-top:2px;}
+.pp-n{margin-left:auto;text-align:center;}
+.pp-num{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--purple);}
+.pp-nl{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+
+/* ═══════════════════════════════════════════════
+   REACTIONS
+═══════════════════════════════════════════════ */
+.reactions{display:flex;gap:6px;padding:7px 0 0;flex-wrap:wrap;}
+.rb{display:flex;align-items:center;gap:3px;padding:5px 9px;border-radius:20px;border:1.5px solid #e8e0f8;background:white;font-size:11px;cursor:pointer;transition:all .15s cubic-bezier(.34,1.56,.64,1);font-family:'Outfit',sans-serif;font-weight:600;color:var(--muted);}
+.rb:active{transform:scale(.82);}
+.rb.on{background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);border-color:transparent;transform:scale(1.07);}
+
+/* ═══════════════════════════════════════════════
+   COMMENTS
+═══════════════════════════════════════════════ */
+.comments{padding:10px 14px 0;border-top:1px solid rgba(0,0,0,.05);margin-top:8px;}
+.ci-row{display:flex;gap:8px;align-items:center;margin-bottom:9px;}
+.ci-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0;font-family:'Cormorant Garamond',serif;}
+.ci-inp{flex:1;padding:8px 12px;border-radius:20px;border:1.5px solid #e0d8f0;font-family:'Outfit',sans-serif;font-size:12px;outline:none;background:#fafafa;transition:border-color .2s;}
+.ci-inp:focus{border-color:var(--purple-s);}
+.ci-send{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--blue));border:none;color:var(--gold);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.ci-send:active{transform:scale(.78) rotate(20deg);}
+.comment-item{display:flex;gap:8px;margin-bottom:8px;animation:cmIn .25s cubic-bezier(.2,0,0,1);}
+@keyframes cmIn{from{opacity:0;transform:translateY(7px) scale(.96);}to{opacity:1;transform:none;}}
+.cm-bubble{background:#f3f0fb;border-radius:0 12px 12px 12px;padding:7px 11px;flex:1;}
+.cm-name{font-size:11px;font-weight:700;color:var(--purple);}
+.cm-text{font-size:12px;color:#333;margin-top:2px;line-height:1.5;}
+.cm-time{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* ═══════════════════════════════════════════════
+   CONTENT CARDS
+═══════════════════════════════════════════════ */
+.cc{margin:0 16px 12px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
+.cc-media{height:82px;display:flex;align-items:center;justify-content:center;font-size:30px;position:relative;}
+.cc-body{padding:13px 14px;}
+.cc-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--ob);margin-bottom:3px;}
+.cc-meta{font-size:11px;color:var(--muted);margin-bottom:8px;}
+.cc-acts{display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
+.cbtn{padding:5px 12px;border-radius:20px;border:1.5px solid #e0d8f0;background:white;font-size:11px;font-weight:600;cursor:pointer;color:var(--ob);font-family:'Outfit',sans-serif;transition:transform .12s cubic-bezier(.34,1.56,.64,1);}
+.cbtn:active{transform:scale(.88);}
+.cbtn.pr{background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);border-color:transparent;}
+.bkm{margin-left:auto;font-size:18px;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.bkm:active{transform:scale(.7) rotate(-15deg);}
+
+/* ═══════════════════════════════════════════════
+   EVENT CARDS
+═══════════════════════════════════════════════ */
+.evt{margin:0 16px 10px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);display:flex;overflow:hidden;transition:transform .15s cubic-bezier(.2,0,0,1.4);}
+.evt:active{transform:scale(.97);}
+.evt-dt{background:linear-gradient(160deg,var(--purple),var(--blue));width:56px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 4px;}
+.evt-day{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:var(--gold);line-height:1;}
+.evt-mon{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.48);}
+.evt-info{padding:11px 12px;flex:1;}
+.evt-title{font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:600;margin-bottom:3px;}
+.evt-det{font-size:11px;color:var(--muted);margin-bottom:7px;}
+.evt-foot{display:flex;align-items:center;gap:6px;}
+.rsvp-btn{padding:5px 12px;border-radius:10px;border:none;font-size:11px;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.rsvp-btn:active{transform:scale(.88);}
+.rsvp-btn.going{background:linear-gradient(135deg,#065f46,#047857);color:#a7f3d0;}
+.rsvp-cnt{font-size:11px;color:var(--muted);}
+
+/* ═══════════════════════════════════════════════
+   AUDIO PLAYER
+═══════════════════════════════════════════════ */
+.audio{margin:0 16px 10px;background:var(--card);border-radius:14px;padding:13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:11px;transition:transform .15s cubic-bezier(.2,0,0,1);}
+.audio:active{transform:scale(.98);}
+.aplay{width:40px;height:40px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;border:none;color:var(--gold);transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.aplay:active{transform:scale(.82) rotate(5deg);}
+.ainfo{flex:1;min-width:0;}
+.atitle{font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ameta{font-size:11px;color:var(--muted);margin-top:1px;}
+.abar{height:3px;background:#e0d8f0;border-radius:3px;margin-top:7px;overflow:hidden;}
+.aprog{height:100%;background:linear-gradient(90deg,var(--purple),var(--blue-s));border-radius:3px;transition:width .3s linear;}
+
+/* ═══════════════════════════════════════════════
+   MEMBERS
+═══════════════════════════════════════════════ */
+.member{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s,transform .12s cubic-bezier(.2,0,0,1);}
+.member:active{background:rgba(200,169,81,.05);transform:scale(.98);}
+.m-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:white;flex-shrink:0;font-family:'Cormorant Garamond',serif;}
+.m-name{font-weight:600;font-size:14px;}
+.m-role{font-size:11px;color:var(--muted);}
+.m-badge{margin-left:auto;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;}
+
+/* ═══════════════════════════════════════════════
+   PRAYER & TESTIMONY CARDS
+═══════════════════════════════════════════════ */
+.prayer-card{margin:0 16px 11px;background:var(--card);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);transition:transform .15s cubic-bezier(.2,0,0,1);}
+.prayer-card:active{transform:scale(.98);}
+.pr-hdr{display:flex;align-items:center;gap:9px;margin-bottom:7px;}
+.pr-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:white;font-family:'Cormorant Garamond',serif;}
+.pr-nm{font-weight:600;font-size:13px;}
+.pr-time{font-size:10px;color:var(--muted);margin-left:auto;}
+.pr-st{font-size:9px;padding:2px 7px;border-radius:8px;font-weight:700;margin-left:6px;}
+.pr-txt{font-size:12px;line-height:1.65;color:#333;margin-bottom:9px;}
+.pray-btn{display:flex;align-items:center;justify-content:center;gap:5px;background:var(--ow);border-radius:10px;padding:8px 12px;border:none;font-size:12px;font-weight:700;color:var(--purple);cursor:pointer;width:100%;font-family:'Outfit',sans-serif;transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.pray-btn:active{transform:scale(.94);}
+
+.test-card{margin:0 16px 11px;background:linear-gradient(135deg,rgba(44,10,94,.04),rgba(13,46,110,.03));border:1px solid rgba(44,10,94,.09);border-radius:var(--r);padding:14px;box-shadow:var(--shadow);transition:transform .15s cubic-bezier(.2,0,0,1);}
+.test-card:active{transform:scale(.98);}
+.test-quote{font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;line-height:1.6;color:var(--ob);margin-bottom:8px;}
+.test-auth{font-size:11px;font-weight:700;color:var(--purple);}
+
+/* ═══════════════════════════════════════════════
+   BIRTHDAY
+═══════════════════════════════════════════════ */
+.bday-full{margin:0 16px 10px;background:linear-gradient(135deg,#7a5200,var(--gold));border-radius:var(--r);padding:14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;cursor:pointer;transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.bday-full:active{transform:scale(.96) rotate(-.5deg);}
+.bf-av{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;color:white;font-family:'Cormorant Garamond',serif;}
+.bf-name{font-weight:700;font-size:15px;color:white;}
+.bf-sub{font-size:11px;color:rgba(255,255,255,.55);margin-top:2px;}
+.bf-ic{margin-left:auto;font-size:28px;animation:bdB 1s ease infinite alternate;}
+
+/* ═══════════════════════════════════════════════
+   PROFILE
+═══════════════════════════════════════════════ */
+.prof-hero{background:linear-gradient(150deg,var(--black),var(--purple),var(--blue));padding:28px 16px 30px;text-align:center;position:relative;overflow:hidden;}
+.prof-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(200,169,81,.2),transparent 60%);}
+.prof-av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--gold-d),var(--gold));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:white;font-family:'Cormorant Garamond',serif;margin:0 auto 10px;border:3px solid rgba(200,169,81,.38);position:relative;cursor:pointer;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.prof-av:active{transform:scale(.88);}
+.prof-name{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:white;position:relative;}
+.prof-role{font-size:11px;color:var(--gold);letter-spacing:1px;position:relative;margin-top:2px;}
+.prof-stats{display:flex;justify-content:center;gap:26px;margin-top:15px;position:relative;}
+.pst{text-align:center;}
+.pst-n{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);}
+.pst-l{font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.5px;}
+.prof-sec{margin:14px 16px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
+.prof-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-bottom:1px solid rgba(0,0,0,.05);cursor:pointer;transition:background .15s,transform .12s cubic-bezier(.2,0,0,1);}
+.prof-row:last-child{border-bottom:none;}
+.prof-row:active{background:rgba(200,169,81,.05);transform:scale(.98);}
+.pric{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.prl{font-weight:600;font-size:14px;color:var(--ob);}
+.prv{font-size:12px;color:var(--muted);margin-top:1px;}
+.prarr{margin-left:auto;color:var(--muted);font-size:16px;transition:transform .15s;}
+.prof-row:active .prarr{transform:translateX(4px);}
+
+/* ═══════════════════════════════════════════════
+   CONTACT
+═══════════════════════════════════════════════ */
+.contact-card{margin:14px 16px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;}
+.contact-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(0,0,0,.04);cursor:pointer;transition:background .15s,transform .12s cubic-bezier(.2,0,0,1);}
+.contact-row:last-child{border-bottom:none;}
+.contact-row:active{background:rgba(200,169,81,.05);transform:scale(.98);}
+.cric{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.crl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.crv{font-size:13px;font-weight:600;color:var(--ob);margin-top:2px;}
+.crarr{margin-left:auto;color:var(--gold);font-size:17px;transition:transform .15s;}
+.contact-row:active .crarr{transform:translateX(5px);}
+
+/* ═══════════════════════════════════════════════
+   LEADERSHIP
+═══════════════════════════════════════════════ */
+.leader-card{margin:0 16px 13px;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);transition:transform .15s cubic-bezier(.2,0,0,1);}
+.leader-card:active{transform:scale(.98);}
+.lc-top{height:68px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.lc-body{padding:12px 14px 14px;}
+.lc-ttl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold-d);margin-bottom:3px;}
+.lc-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--ob);margin-bottom:6px;}
+.lc-bio{font-size:12px;color:var(--muted);line-height:1.6;}
+.lc-soc{display:flex;gap:7px;margin-top:10px;}
+.ls-btn{width:30px;height:30px;border-radius:8px;background:var(--ow);border:1px solid #e0d8f0;display:flex;align-items:center;justify-content:center;font-size:13px;cursor:pointer;transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.ls-btn:active{transform:scale(.8);}
+
+/* ═══════════════════════════════════════════════
+   WEEKLY PROGRAM
+═══════════════════════════════════════════════ */
+.day-card{margin:0 16px 11px;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);}
+.dc-hdr{padding:11px 14px;background:linear-gradient(135deg,var(--purple),var(--blue));display:flex;align-items:center;justify-content:space-between;}
+.dc-name{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--gold);}
+.dc-badge{font-size:9px;background:rgba(200,169,81,.18);color:var(--gold-l);padding:2px 8px;border-radius:8px;font-weight:600;}
+.prog-row{display:flex;align-items:center;gap:11px;padding:10px 14px;border-bottom:1px solid rgba(0,0,0,.05);}
+.prog-row:last-child{border-bottom:none;}
+.prog-time{font-size:10px;font-weight:700;color:var(--blue-s);width:58px;flex-shrink:0;}
+.prog-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.prog-name{font-size:13px;font-weight:500;color:var(--ob);}
+.prog-loc{font-size:10px;color:var(--muted);}
+
+/* ═══════════════════════════════════════════════
+   FORMS
+═══════════════════════════════════════════════ */
+.form-card{margin:14px 16px;background:var(--card);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);}
+.fc-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:var(--purple);margin-bottom:13px;}
+.fl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:block;margin-top:2px;}
+.fi,.ft,.fs{width:100%;padding:11px 14px;border-radius:var(--rs);border:1.5px solid #e0d8f0;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ob);background:#fafafa;outline:none;margin-bottom:11px;transition:border-color .2s,transform .15s;}
+.fi:focus,.ft:focus,.fs:focus{border-color:var(--purple-s);background:white;transform:scale(1.01);}
+.ft{resize:none;height:85px;}
+.pills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.pill{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid #ddd;cursor:pointer;transition:all .15s cubic-bezier(.34,1.56,.64,1);background:white;color:var(--muted);}
+.pill:active{transform:scale(.88);}
+.pill.on{background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);border-color:transparent;transform:scale(1.05);}
+.upload-z{border:2px dashed rgba(44,10,94,.2);border-radius:14px;padding:20px 14px;text-align:center;cursor:pointer;transition:all .2s;background:rgba(200,169,81,.03);margin-bottom:11px;}
+.upload-z:active{background:rgba(200,169,81,.08);border-color:var(--purple-s);transform:scale(.97);}
+
+/* ═══════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════ */
+.btn-primary{width:100%;padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 18px rgba(44,10,94,.28);transition:transform .15s cubic-bezier(.34,1.56,.64,1);position:relative;overflow:hidden;}
+.btn-primary:active{transform:scale(.95);}
+.btn-add{display:block;margin:6px 16px 0;width:calc(100% - 32px);padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(44,10,94,.25);transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.btn-add:active{transform:scale(.96);}
+.btn-cancel{width:100%;padding:11px;border-radius:12px;background:transparent;border:none;color:var(--muted);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;margin-top:8px;transition:color .15s;}
+
+/* ═══════════════════════════════════════════════
+   SEARCH BAR
+═══════════════════════════════════════════════ */
+.search-bar{margin:12px 16px;display:flex;align-items:center;gap:9px;background:white;border-radius:12px;padding:9px 13px;box-shadow:var(--shadow);border:1.5px solid #ede8f8;transition:border-color .2s,transform .15s;}
+.search-bar:focus-within{border-color:var(--purple-s);transform:scale(1.01);}
+.search-bar input{flex:1;border:none;outline:none;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ob);background:transparent;}
+
+/* ═══════════════════════════════════════════════
+   ADMIN PANEL SHEET
+═══════════════════════════════════════════════ */
+#admin-panel{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.55);backdrop-filter:blur(4px);display:none;align-items:flex-end;opacity:0;transition:opacity .2s;}
+#admin-panel.show{display:flex;opacity:1;}
+.ap-sheet{background:var(--ob);border-radius:24px 24px 0 0;width:100%;max-height:88vh;overflow-y:auto;padding:0 0 32px;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,0,0,1);}
+#admin-panel.show .ap-sheet{transform:translateY(0);}
+.ap-handle{width:36px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;margin:12px auto 0;}
+.ap-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold);padding:15px 18px 8px;}
+.ap-sec{padding:8px 18px 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.22);}
+.ap-item{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;transition:background .15s,transform .12s cubic-bezier(.2,0,0,1);}
+.ap-item:active{background:rgba(200,169,81,.06);transform:scale(.98);}
+.ap-icon{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.ap-label{color:white;font-weight:600;font-size:14px;}
+.ap-desc{color:var(--muted);font-size:11px;margin-top:1px;}
+.ap-close{margin:16px 18px 0;width:calc(100% - 36px);padding:13px;border-radius:12px;background:rgba(255,255,255,.05);border:none;color:rgba(255,255,255,.35);font-family:'Outfit',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:background .15s;}
+.ap-close:active{background:rgba(255,255,255,.1);}
+
+/* ═══════════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════════ */
+#modal{position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:none;align-items:flex-end;opacity:0;transition:opacity .2s;}
+#modal.show{display:flex;opacity:1;}
+.modal-sheet{background:var(--ow);border-radius:24px 24px 0 0;width:100%;max-height:90vh;overflow-y:auto;padding:0 0 32px;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,0,0,1);}
+#modal.show .modal-sheet{transform:translateY(0);}
+.modal-handle{width:36px;height:3px;background:rgba(0,0,0,.1);border-radius:2px;margin:12px auto 4px;}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;color:var(--purple);padding:10px 18px 14px;}
+.modal-body{padding:0 18px;}
+
+/* ═══════════════════════════════════════════════
+   SETTINGS PANEL
+═══════════════════════════════════════════════ */
+#settings-panel{position:fixed;inset:0;z-index:850;background:var(--ow);display:none;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.2,0,0,1);}
+#settings-panel.show{display:flex;transform:translateX(0);}
+.sp-hdr{background:var(--black);padding:10px 16px 9px;display:flex;align-items:center;gap:12px;flex-shrink:0;border-bottom:1px solid var(--border);}
+.sp-back{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;border:none;color:white;transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.sp-back:active{transform:scale(.85);}
+.sp-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--gold-l);letter-spacing:.5px;}
+.sp-body{flex:1;overflow-y:auto;}
+.sp-preview{background:linear-gradient(135deg,var(--black),var(--purple),var(--blue));padding:18px 16px 20px;position:relative;overflow:hidden;}
+.sp-preview::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 20%,rgba(200,169,81,.18),transparent 55%);}
+.spv-lbl{font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:4px;position:relative;}
+.spv-name{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:900;color:white;position:relative;}
+.spv-slogan{font-size:12px;color:rgba(255,255,255,.38);margin-top:3px;position:relative;font-style:italic;}
+.spv-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(200,169,81,.14);border:1px solid rgba(200,169,81,.28);border-radius:20px;padding:3px 9px;font-size:10px;color:var(--gold);font-weight:600;margin-top:8px;position:relative;}
+.stabs{display:flex;overflow-x:auto;scrollbar-width:none;background:white;border-bottom:2px solid #f0ebff;flex-shrink:0;}
+.stabs::-webkit-scrollbar{display:none;}
+.stab{flex-shrink:0;padding:11px 15px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;white-space:nowrap;}
+.stab.on{color:var(--purple);border-bottom-color:var(--purple);}
+.sg{background:white;border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin:14px 16px 0;}
+.sg-title{padding:13px 16px 10px;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--purple);border-bottom:1px solid rgba(0,0,0,.05);display:flex;align-items:center;gap:7px;}
+.sg-title span{font-size:17px;}
+.field-row{padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.04);}
+.field-row:last-child{border-bottom:none;}
+.frl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;display:flex;align-items:center;justify-content:space-between;}
+.fri,.frt,.frs{width:100%;padding:10px 13px;border-radius:var(--rs);border:1.5px solid #e8e2f8;font-family:'Outfit',sans-serif;font-size:13px;color:var(--ob);background:#fafafa;outline:none;transition:border-color .2s;}
+.fri:focus,.frt:focus,.frs:focus{border-color:var(--purple-s);background:white;}
+.frt{resize:none;height:70px;}
+.fhint{font-size:10px;color:var(--muted);font-style:italic;margin-top:4px;}
+.fprev{background:rgba(44,10,94,.04);border-radius:9px;padding:8px 11px;margin-top:5px;}
+.fprev-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px;}
+.toggle-row{padding:12px 16px;border-bottom:1px solid rgba(0,0,0,.04);display:flex;align-items:center;justify-content:space-between;}
+.toggle-row:last-child{border-bottom:none;}
+.tr-info{flex:1;padding-right:12px;}
+.tr-label{font-weight:600;font-size:13px;color:var(--ob);}
+.tr-desc{font-size:11px;color:var(--muted);margin-top:2px;}
+.toggle{width:44px;height:24px;border-radius:12px;background:#ddd;cursor:pointer;position:relative;transition:background .25s;flex-shrink:0;}
+.toggle.on{background:linear-gradient(135deg,var(--purple),var(--blue));}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;left:3px;transition:transform .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 4px rgba(0,0,0,.2);}
+.toggle.on::after{transform:translateX(20px);}
+.sp-save{position:sticky;bottom:0;background:white;border-top:1px solid rgba(0,0,0,.06);padding:12px 16px;display:flex;gap:10px;}
+.sp-save-btn{flex:1;padding:13px;border-radius:13px;background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(44,10,94,.26);transition:transform .15s cubic-bezier(.34,1.56,.64,1);}
+.sp-save-btn:active{transform:scale(.96);}
+
+/* ═══════════════════════════════════════════════
+   SERVICE TIMES & MAP
+═══════════════════════════════════════════════ */
+.svc-times{margin:0 16px 14px;background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;}
+.svc-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:700;color:var(--purple);margin-bottom:10px;}
+.svc-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(0,0,0,.05);}
+.svc-row:last-child{border-bottom:none;}
+.svc-day{font-weight:600;font-size:13px;}
+.svc-time{font-size:12px;color:var(--blue-s);font-weight:600;}
+.map-box{margin:0 16px 14px;border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);background:linear-gradient(135deg,var(--purple),var(--blue));height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;color:white;gap:6px;transition:transform .15s cubic-bezier(.2,0,0,1);}
+.map-box:active{transform:scale(.97);}
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+#toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(10px) scale(.9);background:var(--ob);color:var(--gold);padding:10px 20px;border-radius:12px;font-size:12px;font-weight:600;opacity:0;transition:all .22s cubic-bezier(.34,1.56,.64,1);z-index:99999;white-space:nowrap;box-shadow:var(--shadow-lg);border:1px solid var(--border);}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);}
+
+/* ═══════════════════════════════════════════════
+   UTILITY COLORS
+═══════════════════════════════════════════════ */
+.g-royal{background:linear-gradient(135deg,var(--purple),var(--blue));}
+.g-purple{background:linear-gradient(135deg,var(--purple),var(--purple-s));}
+.g-blue{background:linear-gradient(135deg,var(--blue),var(--blue-s));}
+.g-gold{background:linear-gradient(135deg,#7a5200,var(--gold));}
+.g-dark{background:linear-gradient(135deg,var(--black),var(--ob));}
+.g-rose{background:linear-gradient(135deg,#6b1a3a,#9c2558);}
+.g-teal{background:linear-gradient(135deg,#0b5345,#1a7a62);}
+.g-mix{background:linear-gradient(135deg,var(--blue),var(--purple));}
+.g-emerald{background:linear-gradient(135deg,#064e3b,#059669);}
+.tag-svc{background:#ede0ff;color:#5b21b6;}
+.tag-youth{background:#fef3c7;color:#92400e;}
+.tag-pray{background:#fce7f3;color:#9d174d;}
+.tag-gen{background:#d1fae5;color:#065f46;}
+.tag-choir{background:#dbeafe;color:#1e40af;}
+.badge-pastor{background:#fef3c7;color:#92400e;}
+.badge-leader{background:#ede9fe;color:#5b21b6;}
+.badge-choir{background:#dbeafe;color:#1e40af;}
+.badge-mem{background:#f0fdf4;color:#166534;}
+.badge-pend{background:#fef3c7;color:#92400e;}
+.badge-ok{background:#d1fae5;color:#065f46;}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+   SPLASH SCREEN
+═══════════════════════════════════════════ -->
+<div id="splash">
+  <div class="sp-dots" id="sp-dots"></div>
+  <div class="sp-wrap">
+    <div class="sp-v"></div>
+    <div class="sp-h"></div>
+    <div class="sp-glow"></div>
+    <div class="sp-ring"></div>
+  </div>
+  <div class="sp-word">ChurchHub</div>
+  <div class="sp-tag">Connected in Faith · United in Love</div>
+  <div class="sp-bar"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+   AUTH SCREEN
+═══════════════════════════════════════════ -->
+<div id="auth">
+  <svg class="auth-logo" viewBox="0 0 90 90" fill="none">
+    <circle cx="45" cy="45" r="42" stroke="url(#ag1)" stroke-width="2.5"/>
+    <rect x="40" y="14" width="10" height="62" rx="4" fill="url(#ag2)"/>
+    <rect x="20" y="32" width="50" height="10" rx="4" fill="url(#ag2)"/>
+    <defs>
+      <linearGradient id="ag1" x1="0" y1="0" x2="90" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#c8a951"/><stop offset="1" stop-color="#f0d484"/></linearGradient>
+      <linearGradient id="ag2" x1="0" y1="0" x2="0" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#f0d484"/><stop offset="1" stop-color="#c8a951"/></linearGradient>
+    </defs>
+  </svg>
+  <div class="auth-title">ChurchHub</div>
+  <div class="auth-sub" id="auth-church-sub">Grace Community Church</div>
+  <div class="auth-tabs" style="max-width:340px;width:100%;">
+    <div class="at on" onclick="switchAuth('login')">Sign In</div>
+    <div class="at" onclick="switchAuth('register')">Join Church</div>
+  </div>
+  <div class="auth-card" id="login-form">
+    <h3>Welcome Back 🙏</h3>
+    <label class="afl">Email Address</label>
+    <input class="afi" id="le" type="email" placeholder="your@email.com"/>
+    <label class="afl">Password</label>
+    <input class="afi" id="lp" type="password" placeholder="Your password"/>
+    <button class="auth-btn rip" onclick="doLogin()">Sign In</button>
+    <div class="auth-note">Admin: admin@church.com / admin123<br/>Demo: member@church.com / member123<br/><b onclick="switchAuth('register')">New here? Create account →</b></div>
+  </div>
+  <div class="auth-card" id="reg-form" style="display:none;">
+    <h3>Join the Community ✝️</h3>
+    <label class="afl">Full Name</label><input class="afi" id="rn" placeholder="Your full name"/>
+    <label class="afl">Email</label><input class="afi" id="re" type="email" placeholder="your@email.com"/>
+    <label class="afl">Birthday (for Birthday Wall)</label><input class="afi" id="rb" type="date"/>
+    <label class="afl">Department</label>
+    <select class="afi" id="rd"><option>General Member</option><option>Choir</option><option>Youth</option><option>Ushers</option><option>Prayer Team</option><option>Media Team</option></select>
+    <label class="afl">Password</label><input class="afi" id="rp" type="password" placeholder="Min. 6 characters"/>
+    <button class="auth-btn rip" onclick="doRegister()">Create Account</button>
+    <div class="auth-note"><b onclick="switchAuth('login')">← Already have an account?</b></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+   MAIN APP
+═══════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-brand">
+      <svg class="hdr-logo" viewBox="0 0 90 90" fill="none">
+        <circle cx="45" cy="45" r="42" stroke="url(#hg1)" stroke-width="2.5"/>
+        <rect x="40" y="14" width="10" height="62" rx="4" fill="url(#hg2)"/>
+        <rect x="20" y="32" width="50" height="10" rx="4" fill="url(#hg2)"/>
+        <defs>
+          <linearGradient id="hg1" x1="0" y1="0" x2="90" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#c8a951"/><stop offset="1" stop-color="#f0d484"/></linearGradient>
+          <linearGradient id="hg2" x1="0" y1="0" x2="0" y2="90" gradientUnits="userSpaceOnUse"><stop stop-color="#f0d484"/><stop offset="1" stop-color="#c8a951"/></linearGradient>
+        </defs>
+      </svg>
+      <div><div class="hdr-name" id="hdr-app-name">ChurchHub</div><div class="hdr-sub" id="hdr-church-sub">Grace Community Church</div></div>
+    </div>
+    <div class="hdr-right">
+      <span class="admin-badge" id="admin-badge" style="display:none;">ADMIN</span>
+      <div class="hdr-av" id="hdr-av" onclick="go('profile',10)">?</div>
+      <div class="hdr-gear" id="admin-gear" style="display:none;" onclick="openAdminPanel()">⚙️</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="go('home',0)"><span class="ti">🏠</span>Home</button>
+    <button class="tab" onclick="go('sermons',1)"><span class="ti">🎬</span>Sermons</button>
+    <button class="tab" onclick="go('events',2)"><span class="ti">📅</span>Events</button>
+    <button class="tab" onclick="go('program',3)"><span class="ti">📋</span>Program</button>
+    <button class="tab" onclick="go('members',4)"><span class="ti">👥</span>Members</button>
+    <button class="tab" onclick="go('leaders',5)"><span class="ti">👑</span>Leaders</button>
+    <button class="tab" onclick="go('prayer',6)"><span class="ti">🙏</span>Prayer</button>
+    <button class="tab" onclick="go('testimony',7)"><span class="ti">✨</span>Testimony</button>
+    <button class="tab" onclick="go('birthdays',8)"><span class="ti">🎂</span>Birthdays</button>
+    <button class="tab" onclick="go('contact',9)"><span class="ti">📞</span>Contact</button>
+    <button class="tab" onclick="go('profile',10)"><span class="ti">👤</span>Profile</button>
+  </div>
+
+  <div class="content">
+
+    <!-- ════════ HOME ════════ -->
+    <div class="page active" id="page-home">
+      <!-- Ticker -->
+      <div class="ticker-wrap">
+        <div class="ticker" id="ticker-inner">
+          <span class="ticker-item"><span class="td">✦</span> <span id="tk1">Sunday Service · 10:00 AM · Main Sanctuary</span></span>
+          <span class="ticker-item"><span class="td">✦</span> Choir Rehearsal Friday 6:00 PM</span>
+          <span class="ticker-item"><span class="td">✦</span> Youth Bible Study Saturday 4:00 PM</span>
+          <span class="ticker-item"><span class="td">✦</span> Midweek Prayer Night Wed 6:30 PM</span>
+          <span class="ticker-item"><span class="td">✦</span> Community Outreach — March 29</span>
+          <span class="ticker-item"><span class="td">✦</span> <span id="tk2">Sunday Service · 10:00 AM · Main Sanctuary</span></span>
+          <span class="ticker-item"><span class="td">✦</span> Choir Rehearsal Friday 6:00 PM</span>
+          <span class="ticker-item"><span class="td">✦</span> Youth Bible Study Saturday 4:00 PM</span>
+          <span class="ticker-item"><span class="td">✦</span> Midweek Prayer Night Wed 6:30 PM</span>
+          <span class="ticker-item"><span class="td">✦</span> Community Outreach — March 29</span>
+        </div>
+      </div>
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-bg"></div>
+        <div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div>
+        <div class="stars-wrap" id="stars-wrap"></div>
+        <div class="hero-cross">
+          <svg width="110" height="110" viewBox="0 0 90 90" fill="none">
+            <rect x="38" y="8" width="14" height="74" rx="6" fill="white"/>
+            <rect x="8" y="30" width="74" height="14" rx="6" fill="white"/>
+          </svg>
+        </div>
+        <div class="hero-content">
+          <div class="hero-greet" id="hero-greet">Good morning, Grace Community</div>
+          <div class="hero-title">Welcome to<br/><span id="hero-app-name">ChurchHub</span></div>
+          <div class="hero-sub" id="hero-slogan">Connected in Faith · United in Love</div>
+        </div>
+        <div class="live-stats">
+          <div class="ls"><div class="ls-n" id="stat-m">0</div><div class="ls-l">Members</div></div>
+          <div class="ls"><div class="ls-n" id="stat-p">0</div><div class="ls-l">Prayers</div></div>
+          <div class="ls"><div class="ls-n"><span class="live-dot"></span><span id="stat-o">0</span></div><div class="ls-l">Online</div></div>
+          <div class="ls"><div class="ls-n" id="stat-e">0</div><div class="ls-l">Events</div></div>
+        </div>
+      </div>
+      <div class="shimmer"></div>
+
+      <!-- Verse -->
+      <div class="verse-card">
+        <div class="vc-label">✦ Verse of the Day</div>
+        <div class="vc-text" id="vc-text">"For I know the plans I have for you — plans to prosper you and not to harm you, plans to give you hope and a future."</div>
+        <div class="vc-ref" id="vc-ref">— Jeremiah 29:11</div>
+        <div class="vc-dots"><div class="vd on" onclick="setVerse(0)"></div><div class="vd" onclick="setVerse(1)"></div><div class="vd" onclick="setVerse(2)"></div></div>
+      </div>
+
+      <!-- Service Spotlight -->
+      <div class="ss-card">
+        <div class="ss-lbl"><div class="live-dot"></div> Next Service</div>
+        <div class="ss-title" id="ss-sermon-title">"Walking in the Spirit"</div>
+        <div class="ss-spk" id="ss-speaker">Pastor James Adeyemi</div>
+        <div class="ss-chips">
+          <div class="ss-chip">📅 Sunday, Mar 22</div>
+          <div class="ss-chip">🕙 10:00 AM</div>
+          <div class="ss-chip">📍 Main Sanctuary</div>
+        </div>
+        <div class="countdown">
+          <div class="cd"><div class="cd-n" id="cd-d">2</div><div class="cd-l">Days</div></div>
+          <div class="cd"><div class="cd-n" id="cd-h">14</div><div class="cd-l">Hrs</div></div>
+          <div class="cd"><div class="cd-n" id="cd-m">32</div><div class="cd-l">Min</div></div>
+          <div class="cd"><div class="cd-n" id="cd-s">00</div><div class="cd-l">Sec</div></div>
+        </div>
+        <div class="ss-btns">
+          <button class="ss-btn pr rip" onclick="toast('✅ RSVP confirmed! See you Sunday!')">✅ RSVP Now</button>
+          <button class="ss-btn gh" onclick="go('program',3)">📋 Program</button>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="sh"><div class="sh-title">Announcements</div><div class="sh-all" onclick="toast('📢 All announcements')">See all →</div></div>
+      <div class="hscroll">
+        <div class="ann-card">
+          <div class="ac-img g-royal"><span>🕊️</span><div class="ac-badge">Today</div></div>
+          <div class="ac-body">
+            <span class="ac-tag tag-svc">⛪ Service</span>
+            <div class="ac-title">"Walking in the Spirit" — This Sunday</div>
+            <div class="ac-meta">📅 Mar 22 · 10:00 AM</div>
+            <div class="reactions"><button class="rb" onclick="react(this)">🙏 <span>12</span></button><button class="rb" onclick="react(this)">🙌 <span>8</span></button><button class="rb" onclick="react(this)">❤️ <span>5</span></button></div>
+          </div>
+        </div>
+        <div class="ann-card">
+          <div class="ac-img g-rose"><span>🎵</span><div class="ac-badge">Fri</div></div>
+          <div class="ac-body">
+            <span class="ac-tag tag-choir">🎵 Choir</span>
+            <div class="ac-title">Choir Rehearsal — All Voices Welcome!</div>
+            <div class="ac-meta">📅 Mar 20 · 6:00 PM</div>
+            <div class="reactions"><button class="rb" onclick="react(this)">🙏 <span>6</span></button><button class="rb" onclick="react(this)">🙌 <span>3</span></button><button class="rb" onclick="react(this)">❤️ <span>9</span></button></div>
+          </div>
+        </div>
+        <div class="ann-card">
+          <div class="ac-img g-gold"><span>📖</span><div class="ac-badge">Sat</div></div>
+          <div class="ac-body">
+            <span class="ac-tag tag-youth">👶 Youth</span>
+            <div class="ac-title">Youth Bible Study — New Series Begins</div>
+            <div class="ac-meta">📅 Mar 21 · 4:00 PM</div>
+            <div class="reactions"><button class="rb" onclick="react(this)">🙏 <span>4</span></button><button class="rb" onclick="react(this)">🙌 <span>7</span></button><button class="rb" onclick="react(this)">❤️ <span>2</span></button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Access -->
+      <div class="sh"><div class="sh-title">Quick Access</div></div>
+      <div class="qa-grid">
+        <div class="qa g-royal si" onclick="go('sermons',1)"><div class="qa-arr">›</div><div class="qa-iw">🎬</div><div class="qa-l">Sermons & Media</div><div class="qa-s">Videos · Audio · Notes</div></div>
+        <div class="qa g-rose si" onclick="go('prayer',6)"><div class="qa-arr">›</div><div class="qa-iw">🙏</div><div class="qa-l">Prayer Wall</div><div class="qa-s">Submit · Intercede</div></div>
+        <div class="qa g-blue si" onclick="go('events',2)"><div class="qa-arr">›</div><div class="qa-iw">📅</div><div class="qa-l">Events & RSVP</div><div class="qa-s">Upcoming activities</div></div>
+        <div class="qa g-gold si" onclick="go('testimony',7)"><div class="qa-arr">›</div><div class="qa-iw">✨</div><div class="qa-l">Testimonies</div><div class="qa-s">Share God's work</div></div>
+        <div class="qa g-teal si" onclick="go('birthdays',8)"><div class="qa-arr">›</div><div class="qa-iw">🎂</div><div class="qa-l">Birthday Wall</div><div class="qa-s">Celebrate together</div></div>
+        <div class="qa g-dark si" onclick="go('contact',9)"><div class="qa-arr">›</div><div class="qa-iw">📞</div><div class="qa-l">Contact Us</div><div class="qa-s">Get in touch</div></div>
+        <div class="qa wide g-emerald si" onclick="go('sermons',1)">
+          <div class="qa-iw" style="margin-bottom:0;flex-shrink:0;">📢</div>
+          <div><div class="qa-l">Announcements</div><div class="qa-s">Latest church news</div></div>
+          <div style="margin-left:auto;font-size:20px;opacity:.4;">›</div>
+        </div>
+      </div>
+
+      <!-- Birthday Strip -->
+      <div class="bday-strip si" onclick="go('birthdays',8)">
+        <div class="bday-avs"><div class="bday-av">RA</div><div class="bday-av">PO</div><div class="bday-av" style="font-size:10px;">+2</div></div>
+        <div class="bday-txt"><div class="bday-title">🎂 Birthdays This Week!</div><div class="bday-sub">Ruth, Philip & 2 others — send wishes</div></div>
+        <div class="bday-ic">🎉</div>
+      </div>
+
+      <!-- Testimony Peek -->
+      <div class="test-peek si" onclick="go('testimony',7)">
+        <div class="tp-lbl">✨ Latest Testimony</div>
+        <div class="tp-q">"I was unemployed for 8 months and the church prayed with me. Last week I received my dream job offer. God is faithful!"</div>
+        <div class="tp-auth">— Philip Osei, Member · March 2026</div>
+        <div class="reactions" style="margin-top:7px;"><button class="rb" onclick="event.stopPropagation();react(this)">🙌 <span>42</span></button><button class="rb" onclick="event.stopPropagation();react(this)">❤️ <span>28</span></button><button class="rb" onclick="event.stopPropagation();react(this)">🙏 <span>19</span></button></div>
+      </div>
+
+      <!-- Prayer Pulse -->
+      <div class="pp-strip si" onclick="go('prayer',6)">
+        <div class="pp-icon">🙏</div>
+        <div><div class="pp-t">Active Prayer Requests</div><div class="pp-s">Tap to intercede for your brethren</div></div>
+        <div class="pp-n"><div class="pp-num">7</div><div class="pp-nl">Requests</div></div>
+      </div>
+      <div style="height:16px;"></div>
+    </div>
+
+    <!-- ════════ SERMONS ════════ -->
+    <div class="page" id="page-sermons">
+      <div class="pgb"><h2>Sermons & Media</h2><p>Videos, audio, posters & sermon notes</p><div class="dc">🎬</div></div>
+      <div class="ab" id="ab-sermons"><span>⚙️ Admin — Upload & manage media</span><button class="ab-btn" onclick="openModal('upload-media')">+ Upload</button></div>
+      <div style="padding:12px 16px 0;">
+        <div class="upload-z" id="user-upload-z" style="display:none;" onclick="toast('📤 Submit clip to admin for review')">
+          <div style="font-size:26px;margin-bottom:4px;">📤</div>
+          <p style="font-size:12px;color:var(--muted);"><strong style="color:var(--purple);">Share a clip</strong> — submit for admin review</p>
+        </div>
+      </div>
+      <div class="sh"><div class="sh-title">🎥 Sermon Videos</div></div>
+      <div class="cc si">
+        <div class="cc-media g-royal" style="position:relative;"><span style="font-size:36px;">▶️</span><div style="position:absolute;top:8px;right:10px;background:rgba(0,0,0,.5);color:white;font-size:9px;padding:2px 7px;border-radius:7px;font-weight:600;">32 min</div></div>
+        <div class="cc-body">
+          <div class="cc-title">Walking in the Spirit — Mar 15</div>
+          <div class="cc-meta">Pastor James Adeyemi · 1.2k views</div>
+          <div class="cc-acts">
+            <button class="cbtn pr" onclick="toast('▶ Playing video...')">▶ Watch</button>
+            <button class="cbtn" onclick="toast('📤 Link copied!')">Share</button>
+            <button class="cbtn" onclick="toast('📥 Downloading...')">📄 Notes</button>
+            <span class="bkm" onclick="toggleBkm(this)">🔖</span>
+          </div>
+          <div class="reactions"><button class="rb" onclick="react(this)">🙏 <span>34</span></button><button class="rb" onclick="react(this)">🙌 <span>21</span></button><button class="rb" onclick="react(this)">❤️ <span>18</span></button></div>
+          <div class="comments">
+            <div class="comment-item"><div class="ci-av" id="cav1">?</div><div class="cm-bubble"><div class="cm-name" id="cname1">You</div><div class="cm-text">This sermon really blessed me! 🙏</div><div class="cm-time">2h ago</div></div></div>
+            <div class="comment-item"><div class="ci-av g-rose" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:white;flex-shrink:0;font-family:'Cormorant Garamond',serif;">GN</div><div class="cm-bubble"><div class="cm-name">Grace Nwosu</div><div class="cm-text">Amen! The Spirit truly moved today 🕊️</div><div class="cm-time">1h ago</div></div></div>
+            <div class="ci-row"><div class="ci-av" id="cav2">?</div><input class="ci-inp" placeholder="Add a comment…" onkeypress="if(event.key==='Enter')addComment(this)"/><button class="ci-send" onclick="addComment(this.previousElementSibling)">➤</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="cc si">
+        <div class="cc-media g-blue" style="position:relative;"><span style="font-size:36px;">▶️</span><div style="position:absolute;top:8px;right:10px;background:rgba(0,0,0,.5);color:white;font-size:9px;padding:2px 7px;border-radius:7px;font-weight:600;">45 min</div></div>
+        <div class="cc-body">
+          <div class="cc-title">Faith Over Fear — Mar 8</div>
+          <div class="cc-meta">Pastor James Adeyemi · 980 views</div>
+          <div class="cc-acts"><button class="cbtn pr" onclick="toast('▶ Playing...')">▶ Watch</button><button class="cbtn" onclick="toast('📤 Copied!')">Share</button><span class="bkm" onclick="toggleBkm(this)">🔖</span></div>
+          <div class="reactions"><button class="rb" onclick="react(this)">🙏 <span>27</span></button><button class="rb" onclick="react(this)">🙌 <span>15</span></button><button class="rb" onclick="react(this)">❤️ <span>22</span></button></div>
+        </div>
+      </div>
+      <div class="sh"><div class="sh-title">🎵 Audio Sermons</div></div>
+      <div class="audio si">
+        <button class="aplay" onclick="playAudio(this,'ap1')">▶</button>
+        <div class="ainfo"><div class="atitle">Sunday Sermon — Walking in the Spirit</div><div class="ameta">Pastor James · 32 min</div><div class="abar"><div class="aprog" id="ap1" style="width:0%"></div></div><div class="reactions" style="margin-top:5px;"><button class="rb" onclick="react(this)">🙏 <span>18</span></button><button class="rb" onclick="react(this)">❤️ <span>9</span></button></div></div>
+        <span class="bkm" onclick="toggleBkm(this)">🔖</span>
+      </div>
+      <div class="audio si">
+        <button class="aplay" onclick="playAudio(this,'ap2')">▶</button>
+        <div class="ainfo"><div class="atitle">Worship Set — Mar 15 Service</div><div class="ameta">Choir & Worship Team · 18 min</div><div class="abar"><div class="aprog" id="ap2" style="width:0%"></div></div><div class="reactions" style="margin-top:5px;"><button class="rb" onclick="react(this)">🙌 <span>24</span></button><button class="rb" onclick="react(this)">❤️ <span>14</span></button></div></div>
+        <span class="bkm" onclick="toggleBkm(this)">🔖</span>
+      </div>
+      <div class="audio si">
+        <button class="aplay" onclick="playAudio(this,'ap3')">▶</button>
+        <div class="ainfo"><div class="atitle">Midweek Teaching — Faith Over Fear</div><div class="ameta">Pastor James · 40 min</div><div class="abar"><div class="aprog" id="ap3" style="width:0%"></div></div></div>
+        <span class="bkm" onclick="toggleBkm(this)">🔖</span>
+      </div>
+      <div class="sh"><div class="sh-title">🎨 Posters & Graphics</div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:0 16px;">
+        <div class="si" style="border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;" onclick="toast('🖼 Viewing poster...')" class="g-gold"><div class="g-gold" style="position:absolute;inset:0;"></div><div style="font-size:36px;z-index:1;">🎨</div><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));color:white;font-size:11px;font-weight:600;padding:16px 9px 8px;z-index:2;">Easter Sunday 2026</div></div>
+        <div class="si" style="border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;" onclick="toast('🖼 Viewing poster...')"><div class="g-purple" style="position:absolute;inset:0;"></div><div style="font-size:36px;z-index:1;">✨</div><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));color:white;font-size:11px;font-weight:600;padding:16px 9px 8px;z-index:2;">Prayer Night Flyer</div></div>
+        <div class="si" style="border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;" onclick="toast('🖼 Viewing poster...')"><div class="g-blue" style="position:absolute;inset:0;"></div><div style="font-size:36px;z-index:1;">🎵</div><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));color:white;font-size:11px;font-weight:600;padding:16px 9px 8px;z-index:2;">Choir Concert</div></div>
+        <div class="si" style="border-radius:14px;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;" onclick="toast('🖼 Viewing poster...')"><div class="g-rose" style="position:absolute;inset:0;"></div><div style="font-size:36px;z-index:1;">📖</div><div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));color:white;font-size:11px;font-weight:600;padding:16px 9px 8px;z-index:2;">Youth Camp 2026</div></div>
+      </div>
+      <div class="sh"><div class="sh-title">📄 Notes & Programs</div></div>
+      <div style="margin:0 16px 9px;background:var(--card);border-radius:12px;padding:13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:11px;cursor:pointer;" class="si" onclick="toast('📄 Opening...')"><div style="font-size:28px;">📄</div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">Sunday Bulletin — Mar 22</div><div style="font-size:11px;color:var(--muted);">PDF · 1.2 MB</div></div><div style="color:var(--gold);font-size:18px;">⬇</div></div>
+      <div style="margin:0 16px 9px;background:var(--card);border-radius:12px;padding:13px;box-shadow:var(--shadow);display:flex;align-items:center;gap:11px;cursor:pointer;" class="si" onclick="toast('📝 Opening...')"><div style="font-size:28px;">📝</div><div style="flex:1;"><div style="font-weight:600;font-size:13px;">Sermon Notes — "Walking in the Spirit"</div><div style="font-size:11px;color:var(--muted);">PDF · 850 KB</div></div><div style="color:var(--gold);font-size:18px;">⬇</div></div>
+    </div>
+
+    <!-- ════════ EVENTS ════════ -->
+    <div class="page" id="page-events">
+      <div class="pgb"><h2>Events Calendar</h2><p>RSVP & stay updated on activities</p><div class="dc">📅</div></div>
+      <div class="ab" id="ab-events"><span>⚙️ Admin — Manage events</span><button class="ab-btn" onclick="openModal('add-event')">+ Add Event</button></div>
+      <div class="sh"><div class="sh-title">Upcoming Events</div></div>
+      <div class="evt si"><div class="evt-dt"><div class="evt-day">22</div><div class="evt-mon">Mar</div></div><div class="evt-info"><div class="evt-title">Sunday Worship Service</div><div class="evt-det">🕙 10:00 AM – 12:30 PM · 📍 Main Sanctuary</div><div class="evt-foot"><button class="rsvp-btn rip" onclick="rsvp(this)">RSVP</button><span class="rsvp-cnt">47 going</span><button class="cbtn" style="font-size:10px;padding:4px 8px;" onclick="toast('💬 Event comments...')">💬 Chat</button></div></div></div>
+      <div class="evt si"><div class="evt-dt"><div class="evt-day">26</div><div class="evt-mon">Mar</div></div><div class="evt-info"><div class="evt-title">Midweek Prayer Night</div><div class="evt-det">🕖 6:30 PM – 8:00 PM · 📍 Prayer Hall</div><div class="evt-foot"><button class="rsvp-btn rip" onclick="rsvp(this)">RSVP</button><span class="rsvp-cnt">23 going</span></div></div></div>
+      <div class="evt si"><div class="evt-dt"><div class="evt-day">29</div><div class="evt-mon">Mar</div></div><div class="evt-info"><div class="evt-title">Community Outreach Day</div><div class="evt-det">🕘 9:00 AM – 2:00 PM · 📍 Church Grounds</div><div class="evt-foot"><button class="rsvp-btn rip" onclick="rsvp(this)">RSVP</button><span class="rsvp-cnt">31 going</span></div></div></div>
+      <div class="evt si"><div class="evt-dt"><div class="evt-day">5</div><div class="evt-mon">Apr</div></div><div class="evt-info"><div class="evt-title">Easter Sunday Service</div><div class="evt-det">🕙 9:00 AM – 1:00 PM · 📍 Main Sanctuary</div><div class="evt-foot"><button class="rsvp-btn rip" onclick="rsvp(this)">RSVP</button><span class="rsvp-cnt">89 going</span></div></div></div>
+      <button class="btn-add rip" onclick="openModal('add-event')">+ Add New Event</button>
+      <div style="height:14px;"></div>
+    </div>
+
+    <!-- ════════ WEEKLY PROGRAM ════════ -->
+    <div class="page" id="page-program">
+      <div class="pgb"><h2>Weekly Program</h2><p>Full schedule of church activities</p><div class="dc">📋</div></div>
+      <div class="ab" id="ab-program"><span>⚙️ Admin — Edit schedule</span><button class="ab-btn" onclick="openModal('edit-program')">Edit</button></div>
+      <div style="height:12px;"></div>
+      <div class="day-card si"><div class="dc-hdr"><div class="dc-name">Sunday</div><div class="dc-badge">Main Service</div></div>
+        <div class="prog-row"><div class="prog-time">7:00 AM</div><div class="prog-dot"></div><div><div class="prog-name">Early Morning Prayer</div><div class="prog-loc">📍 Prayer Hall</div></div></div>
+        <div class="prog-row"><div class="prog-time">9:30 AM</div><div class="prog-dot"></div><div><div class="prog-name">Sunday School</div><div class="prog-loc">📍 Fellowship Hall</div></div></div>
+        <div class="prog-row"><div class="prog-time">10:00 AM</div><div class="prog-dot" style="background:var(--gold-l);"></div><div><div class="prog-name">Main Worship Service</div><div class="prog-loc">📍 Main Sanctuary</div></div></div>
+        <div class="prog-row"><div class="prog-time">12:30 PM</div><div class="prog-dot"></div><div><div class="prog-name">Post-Service Fellowship</div><div class="prog-loc">📍 Courtyard</div></div></div>
+      </div>
+      <div class="day-card si"><div class="dc-hdr"><div class="dc-name">Monday</div><div class="dc-badge">Prayer</div></div>
+        <div class="prog-row"><div class="prog-time">6:00 AM</div><div class="prog-dot"></div><div><div class="prog-name">Dawn Prayer Meeting</div><div class="prog-loc">📍 Prayer Hall</div></div></div>
+        <div class="prog-row"><div class="prog-time">7:00 PM</div><div class="prog-dot"></div><div><div class="prog-name">Men's Fellowship</div><div class="prog-loc">📍 Hall B</div></div></div>
+      </div>
+      <div class="day-card si"><div class="dc-hdr"><div class="dc-name">Tuesday</div><div class="dc-badge">Growth</div></div>
+        <div class="prog-row"><div class="prog-time">10:00 AM</div><div class="prog-dot"></div><div><div class="prog-name">Women's Bible Study</div><div class="prog-loc">📍 Fellowship Hall</div></div></div>
+        <div class="prog-row"><div class="prog-time">6:00 PM</div><div class="prog-dot"></div><div><div class="prog-name">New Members Class</div><div class="prog-loc">📍 Room 101</div></div></div>
+      </div>
+      <div class="day-card si"><div class="dc-hdr"><div class="dc-name">Wednesday</div><div class="dc-badge">Midweek</div></div>
+        <div class="prog-row"><div class="prog-time">6:30 PM</div><div class="prog-dot" style="background:var(--blue-b);"></div><div><div class="prog-name">Midweek Bible Study</div><div class="prog-loc">📍 Main Sanctuary</div></div></div>
+        <div class="prog-row"><div class="prog-time">8:00 PM</div><div class="prog-dot"></div><div><div class="prog-name">Prayer & Intercession</div><div class="prog-loc">📍 Prayer Hall</div></div></div>
+      </div>
+      <div class="day-card si"><div class="dc-hdr"><div class="dc-name">Friday</div><div class="dc-badge">Youth & Choir</div></div>
+        <div class="prog-row"><div class="prog-time">4:00 PM</div><div class="prog-dot"></div><div><div class="prog-name">Youth Meeting</div><div class="prog-loc">📍 Youth Hall</div></div></div>
+        <div class="prog-row"><div class="prog-time">6:00 PM</div><div class="prog-dot"></div><div><div class="prog-name">Choir Rehearsal</div><div class="prog-loc">📍 Music Room</div></div></div>
+      </div>
+      <div class="day-card si"><div class="dc-hdr"><div class="dc-name">Saturday</div><div class="dc-badge">Outreach</div></div>
+        <div class="prog-row"><div class="prog-time">9:00 AM</div><div class="prog-dot"></div><div><div class="prog-name">Community Outreach</div><div class="prog-loc">📍 Various Locations</div></div></div>
+        <div class="prog-row"><div class="prog-time">4:00 PM</div><div class="prog-dot"></div><div><div class="prog-name">Youth Bible Study</div><div class="prog-loc">📍 Youth Hall</div></div></div>
+      </div>
+    </div>
+
+    <!-- ════════ MEMBERS ════════ -->
+    <div class="page" id="page-members">
+      <div class="pgb"><h2>Church Directory</h2><p>Our beloved congregation</p><div class="dc">👥</div></div>
+      <div class="ab" id="ab-members"><span>⚙️ Admin — Manage members</span><button class="ab-btn" onclick="openModal('add-member')">+ Add</button></div>
+      <div class="search-bar"><span>🔍</span><input type="text" placeholder="Search members…" oninput="filterM(this.value)"/></div>
+      <div style="padding:0 16px 9px;display:flex;gap:6px;flex-wrap:wrap;">
+        <div class="pill on" onclick="this.classList.toggle('on')">All</div>
+        <div class="pill" onclick="this.classList.toggle('on')">Leaders</div>
+        <div class="pill" onclick="this.classList.toggle('on')">Choir</div>
+        <div class="pill" onclick="this.classList.toggle('on')">Youth</div>
+      </div>
+      <div id="mlist">
+        <div class="member si"><div class="m-av g-royal">JA</div><div><div class="m-name">Pastor James Adeyemi</div><div class="m-role">Senior Pastor</div></div><span class="m-badge badge-pastor">Pastor</span></div>
+        <div class="member si"><div class="m-av g-rose">GN</div><div><div class="m-name">Grace Nwosu</div><div class="m-role">Worship Leader</div></div><span class="m-badge badge-choir">Choir</span></div>
+        <div class="member si"><div class="m-av g-teal">DF</div><div><div class="m-name">David Freeman</div><div class="m-role">Deacon</div></div><span class="m-badge badge-leader">Leader</span></div>
+        <div class="member si"><div class="m-av g-gold">RA</div><div><div class="m-name">Ruth Abiodun</div><div class="m-role">Member</div></div><span class="m-badge badge-mem">Member</span></div>
+        <div class="member si"><div class="m-av g-purple">SO</div><div><div class="m-name">Samuel Okafor</div><div class="m-role">Youth Leader</div></div><span class="m-badge badge-leader">Leader</span></div>
+        <div class="member si"><div class="m-av g-blue">EC</div><div><div class="m-name">Esther Collins</div><div class="m-role">Choir Alto</div></div><span class="m-badge badge-choir">Choir</span></div>
+        <div class="member si"><div class="m-av g-mix">MI</div><div><div class="m-name">Mary Ihejirika</div><div class="m-role">Member</div></div><span class="m-badge badge-mem">Member</span></div>
+        <div class="member si"><div class="m-av g-dark">PO</div><div><div class="m-name">Philip Osei</div><div class="m-role">Member</div></div><span class="m-badge badge-mem">Member</span></div>
+      </div>
+      <button class="btn-add rip" onclick="openModal('add-member')">+ Add New Member</button>
+      <div style="height:14px;"></div>
+    </div>
+
+    <!-- ════════ LEADERSHIP ════════ -->
+    <div class="page" id="page-leaders">
+      <div class="pgb"><h2>Leadership Board</h2><p>Shepherds of our congregation</p><div class="dc">👑</div></div>
+      <div class="ab" id="ab-leaders"><span>⚙️ Admin — Edit leadership</span><button class="ab-btn" onclick="openModal('edit-leader')">Edit</button></div>
+      <div style="height:12px;"></div>
+      <div class="leader-card si"><div class="lc-top g-royal" style="font-size:28px;">👨‍💼</div><div class="lc-body"><div class="lc-ttl">Senior Pastor</div><div class="lc-name">Pastor James Adeyemi</div><div class="lc-bio">With over 20 years in ministry, Pastor James leads our congregation with wisdom and a deep passion for God's Word. He holds a Master of Divinity and has planted 3 churches.</div><div class="lc-soc"><div class="ls-btn" onclick="toast('📧 pastor@gracechurch.org')">📧</div><div class="ls-btn" onclick="toast('📞 Calling...')">📞</div></div></div></div>
+      <div class="leader-card si"><div class="lc-top g-rose" style="font-size:28px;">👩‍💼</div><div class="lc-body"><div class="lc-ttl">Associate Pastor / Women's Ministry</div><div class="lc-name">Pastor (Mrs.) Deborah Adeyemi</div><div class="lc-bio">Pastor Deborah heads Women's Ministry and Pastoral Care with a compassionate heart for people.</div><div class="lc-soc"><div class="ls-btn" onclick="toast('📧 deborah@gracechurch.org')">📧</div><div class="ls-btn" onclick="toast('📞 Calling...')">📞</div></div></div></div>
+      <div class="leader-card si"><div class="lc-top g-blue" style="font-size:28px;">🎵</div><div class="lc-body"><div class="lc-ttl">Worship & Music Director</div><div class="lc-name">Grace Nwosu</div><div class="lc-bio">Grace leads the worship team with an anointed voice and a heart to usher the congregation into the presence of God.</div><div class="lc-soc"><div class="ls-btn" onclick="toast('📧 grace@gracechurch.org')">📧</div></div></div></div>
+      <div class="leader-card si"><div class="lc-top g-teal" style="font-size:28px;">🙏</div><div class="lc-body"><div class="lc-ttl">Head Deacon / Administration</div><div class="lc-name">Deacon David Freeman</div><div class="lc-bio">Deacon David oversees the administrative and welfare arms of the church ensuring every member is cared for.</div><div class="lc-soc"><div class="ls-btn" onclick="toast('📧 david@gracechurch.org')">📧</div></div></div></div>
+      <div class="leader-card si"><div class="lc-top g-gold" style="font-size:28px;">⚡</div><div class="lc-body"><div class="lc-ttl">Youth & Young Adults Pastor</div><div class="lc-name">Pastor Samuel Okafor</div><div class="lc-bio">Pastor Samuel passionately mentors the next generation through dynamic programmes and outreach events.</div><div class="lc-soc"><div class="ls-btn" onclick="toast('📧 samuel@gracechurch.org')">📧</div><div class="ls-btn" onclick="toast('📷 Instagram...')">📷</div></div></div></div>
+      <div style="height:14px;"></div>
+    </div>
+
+    <!-- ════════ PRAYER ════════ -->
+    <div class="page" id="page-prayer">
+      <div class="pgb"><h2>Prayer Wall</h2><p>Lift each other up in faith</p><div class="dc">🙏</div></div>
+      <div class="ab" id="ab-prayer"><span>⚙️ Admin — Moderate requests</span><button class="ab-btn" onclick="toast('📋 Moderation panel')">Moderate</button></div>
+      <div class="form-card">
+        <div class="fc-title">🙏 Submit Prayer Request</div>
+        <label class="fl">Your Name</label><input class="fi" id="pr-name" placeholder="Your name or Anonymous"/>
+        <label class="fl">Prayer Request</label><textarea class="ft" id="pr-text" placeholder="Share what's on your heart…"></textarea>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><input type="checkbox" id="pr-anon" style="width:15px;height:15px;"/><label for="pr-anon" style="font-size:12px;color:var(--muted);">Post anonymously</label></div>
+        <button class="btn-primary rip" onclick="submitPrayer()">Submit Prayer Request</button>
+      </div>
+      <div class="sh"><div class="sh-title">Prayer Requests</div></div>
+      <div id="prayer-list">
+        <div class="prayer-card si">
+          <div class="pr-hdr"><div class="pr-av g-royal">RA</div><div><div class="pr-nm">Ruth Abiodun</div></div><span class="pr-st badge-ok">Approved</span><div class="pr-time">2h ago</div></div>
+          <div class="pr-txt">Please pray for my mother recovering from surgery. Believing God for complete healing. 🙌</div>
+          <div class="reactions" style="margin-bottom:8px;"><button class="rb" onclick="react(this)">🙏 <span>14</span></button><button class="rb" onclick="react(this)">❤️ <span>7</span></button></div>
+          <button class="pray-btn" onclick="pray(this)">🙏 &nbsp;I'm Praying for This</button>
+        </div>
+        <div class="prayer-card si">
+          <div class="pr-hdr"><div class="pr-av g-teal">AN</div><div><div class="pr-nm">Anonymous</div></div><span class="pr-st badge-ok">Approved</span><div class="pr-time">5h ago</div></div>
+          <div class="pr-txt">Prayers for my job situation. Trusting God to open doors for my family this season.</div>
+          <div class="reactions" style="margin-bottom:8px;"><button class="rb" onclick="react(this)">🙏 <span>20</span></button><button class="rb" onclick="react(this)">❤️ <span>11</span></button></div>
+          <button class="pray-btn" onclick="pray(this)">🙏 &nbsp;I'm Praying for This</button>
+        </div>
+        <div class="prayer-card si" style="background:linear-gradient(135deg,rgba(6,95,70,.04),rgba(4,120,87,.04));border:1px solid rgba(6,95,70,.1);">
+          <div class="pr-hdr"><div class="pr-av g-teal">EC</div><div><div class="pr-nm">Esther Collins</div></div><span class="pr-st" style="background:#d1fae5;color:#065f46;">Answered! 🙌</span><div class="pr-time">2d ago</div></div>
+          <div class="pr-txt">🙌 ANSWERED PRAYER! God provided for our rent — thank you all for praying! God is faithful!</div>
+          <button class="pray-btn" style="background:#d1fae5;color:#065f46;" onclick="toast('🙌 Praising God with Esther!')">🙌 &nbsp;Praise God Together</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════════ TESTIMONY ════════ -->
+    <div class="page" id="page-testimony">
+      <div class="pgb"><h2>Testimonies</h2><p>Share what God has done for you</p><div class="dc">✨</div></div>
+      <div class="ab" id="ab-testimony"><span>⚙️ Admin — Approve testimonies</span><button class="ab-btn" onclick="toast('📋 3 pending...')">Review (3)</button></div>
+      <div class="form-card">
+        <div class="fc-title">✨ Share Your Testimony</div>
+        <label class="fl">Your Name</label><input class="fi" id="test-name" placeholder="Your name"/>
+        <label class="fl">Your Testimony</label><textarea class="ft" id="test-text" style="height:110px;" placeholder="Share what God has done in your life…"></textarea>
+        <div style="background:rgba(200,169,81,.08);border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:11px;color:var(--gold-d);">📋 Admin will review before publishing.</div>
+        <button class="btn-primary rip" onclick="submitTestimony()">Submit Testimony</button>
+      </div>
+      <div class="sh"><div class="sh-title">Recent Testimonies</div></div>
+      <div class="test-card si">
+        <div style="font-size:22px;margin-bottom:6px;">✨</div>
+        <div class="test-quote">"I was unemployed for 8 months and the church prayed with me. Last week I received my dream job offer. God is faithful and this community stood by me!"</div>
+        <div class="test-auth">— Philip Osei, Member · March 2026</div>
+        <div class="reactions" style="margin-top:8px;"><button class="rb" onclick="react(this)">🙌 <span>42</span></button><button class="rb" onclick="react(this)">❤️ <span>28</span></button><button class="rb" onclick="react(this)">🙏 <span>19</span></button></div>
+      </div>
+      <div class="test-card si">
+        <div style="font-size:22px;margin-bottom:6px;">🙏</div>
+        <div class="test-quote">"After Pastor Deborah's couples prayer session, God completely restored our marriage. We are stronger than ever!"</div>
+        <div class="test-auth">— Anonymous Member · February 2026</div>
+        <div class="reactions" style="margin-top:8px;"><button class="rb" onclick="react(this)">🙌 <span>37</span></button><button class="rb" onclick="react(this)">❤️ <span>31</span></button></div>
+      </div>
+    </div>
+
+    <!-- ════════ BIRTHDAYS ════════ -->
+    <div class="page" id="page-birthdays">
+      <div class="pgb"><h2>Birthday Wall 🎂</h2><p>Celebrate each other with love</p><div class="dc">🎉</div></div>
+      <div class="sh"><div class="sh-title">🎂 Celebrating This Week</div></div>
+      <div class="bday-full si" onclick="toast('🎂 Wishing Ruth a happy birthday!')"><div class="bf-av">RA</div><div><div class="bf-name">Ruth Abiodun</div><div class="bf-sub">Today · March 19 🎉</div></div><div class="bf-ic">🎂</div></div>
+      <div class="bday-full si" style="background:linear-gradient(135deg,var(--blue),var(--blue-s));" onclick="toast('🎈 Happy Birthday Philip!')"><div class="bf-av">PO</div><div><div class="bf-name">Philip Osei</div><div class="bf-sub">Tomorrow · March 20</div></div><div class="bf-ic">🎈</div></div>
+      <div class="bday-full si" style="background:linear-gradient(135deg,var(--purple),var(--purple-m));" onclick="toast('🥳 Happy Birthday Esther!')"><div class="bf-av">EC</div><div><div class="bf-name">Esther Collins</div><div class="bf-sub">March 23 🥳</div></div><div class="bf-ic">🥳</div></div>
+      <div class="form-card si">
+        <div class="fc-title">💌 Send Birthday Wishes</div>
+        <label class="fl">Select Member</label>
+        <select class="fs"><option>Ruth Abiodun (Today!)</option><option>Philip Osei (Tomorrow)</option><option>Esther Collins (Mar 23)</option></select>
+        <label class="fl">Your Message</label>
+        <textarea class="ft" placeholder="Happy Birthday! May God continue to bless you…"></textarea>
+        <button class="btn-primary rip" onclick="toast('💌 Birthday wish sent! 🎂')">Send Birthday Wish 🎂</button>
+      </div>
+      <div class="sh"><div class="sh-title">Upcoming Birthdays</div></div>
+      <div class="member si"><div class="m-av g-royal">JA</div><div><div class="m-name">Pastor James Adeyemi</div><div class="m-role">April 3</div></div><span style="margin-left:auto;font-size:22px;">🎂</span></div>
+      <div class="member si"><div class="m-av g-blue">SO</div><div><div class="m-name">Samuel Okafor</div><div class="m-role">April 11</div></div><span style="margin-left:auto;font-size:22px;">🎂</span></div>
+      <div class="member si"><div class="m-av g-teal">GN</div><div><div class="m-name">Grace Nwosu</div><div class="m-role">April 18</div></div><span style="margin-left:auto;font-size:22px;">🎂</span></div>
+    </div>
+
+    <!-- ════════ CONTACT ════════ -->
+    <div class="page" id="page-contact">
+      <div style="background:linear-gradient(150deg,var(--black),var(--purple),var(--blue));padding:24px 16px 28px;text-align:center;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(200,169,81,.18),transparent 60%);"></div>
+        <div style="font-size:44px;margin-bottom:8px;position:relative;">⛪</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:white;position:relative;" id="contact-church-name">Grace Community Church</div>
+        <div style="font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.3);text-transform:uppercase;position:relative;margin-top:3px;">ChurchHub · Connected in Faith</div>
+      </div>
+      <div class="ab" id="ab-contact"><span>⚙️ Admin — Update contact info</span><button class="ab-btn" onclick="openSettings('contact')">Edit</button></div>
+      <div class="contact-card si">
+        <div class="contact-row" onclick="toast('📞 +1 (234) 567-8900')"><div class="cric g-royal">📞</div><div><div class="crl">Phone</div><div class="crv" id="c-phone-disp">+1 (234) 567-8900</div></div><div class="crarr">›</div></div>
+        <div class="contact-row" onclick="toast('📧 info@gracechurch.org')"><div class="cric g-blue">📧</div><div><div class="crl">Email</div><div class="crv" id="c-email-disp">info@gracechurch.org</div></div><div class="crarr">›</div></div>
+        <div class="contact-row" onclick="toast('💬 Opening WhatsApp...')"><div class="cric g-teal">💬</div><div><div class="crl">WhatsApp</div><div class="crv" id="c-whatsapp-disp">+1 (234) 567-8901</div></div><div class="crarr">›</div></div>
+        <div class="contact-row" onclick="toast('🌐 Opening website...')"><div class="cric g-purple">🌐</div><div><div class="crl">Website</div><div class="crv" id="c-website-disp">www.gracechurch.org</div></div><div class="crarr">›</div></div>
+        <div class="contact-row" onclick="toast('📘 Facebook...')"><div class="cric g-blue">📘</div><div><div class="crl">Facebook</div><div class="crv" id="c-fb-disp">Grace Community Church</div></div><div class="crarr">›</div></div>
+        <div class="contact-row" onclick="toast('📷 Instagram...')"><div class="cric g-rose">📷</div><div><div class="crl">Instagram</div><div class="crv" id="c-ig-disp">@gracecommunity</div></div><div class="crarr">›</div></div>
+        <div class="contact-row" onclick="toast('▶ YouTube...')"><div class="cric" style="background:linear-gradient(135deg,#8b0000,#cc0000);border-radius:12px;">▶️</div><div><div class="crl">YouTube</div><div class="crv" id="c-yt-disp">Grace Community Church</div></div><div class="crarr">›</div></div>
+      </div>
+      <div class="map-box si" onclick="toast('🗺 Opening maps...')">
+        <div style="font-size:30px;">📍</div>
+        <div style="font-size:13px;font-weight:600;color:var(--gold);" id="c-addr-disp">123 Faith Avenue, Grace District</div>
+        <div style="font-size:11px;opacity:.38;">Tap to open in Maps</div>
+      </div>
+      <div class="svc-times si">
+        <div class="svc-title">⏰ Service Times</div>
+        <div class="svc-row"><div class="svc-day">Sunday Morning</div><div class="svc-time" id="svc-sunday-disp">10:00 AM</div></div>
+        <div class="svc-row"><div class="svc-day">Sunday School</div><div class="svc-time">9:30 AM</div></div>
+        <div class="svc-row"><div class="svc-day">Wednesday Bible Study</div><div class="svc-time">6:30 PM</div></div>
+        <div class="svc-row"><div class="svc-day">Friday Choir Rehearsal</div><div class="svc-time">6:00 PM</div></div>
+      </div>
+    </div>
+
+    <!-- ════════ PROFILE ════════ -->
+    <div class="page" id="page-profile">
+      <div class="prof-hero">
+        <div class="prof-av" id="prof-av" onclick="toast('📸 Change photo...')">?</div>
+        <div class="prof-name" id="prof-name">Loading…</div>
+        <div class="prof-role" id="prof-role">Member</div>
+        <div class="prof-stats">
+          <div class="pst"><div class="pst-n">7</div><div class="pst-l">Sermons</div></div>
+          <div class="pst"><div class="pst-n">3</div><div class="pst-l">Prayers</div></div>
+          <div class="pst"><div class="pst-n">1</div><div class="pst-l">Testimony</div></div>
+        </div>
+      </div>
+      <div class="prof-sec">
+        <div class="prof-row" onclick="openSettings('church')"><div class="pric g-royal" style="border-radius:10px;">✏️</div><div><div class="prl">Edit Profile</div><div class="prv">Update your info</div></div><div class="prarr">›</div></div>
+        <div class="prof-row" id="admin-settings-row" style="display:none;" onclick="openSettings('church')"><div class="pric g-gold" style="border-radius:10px;">⚙️</div><div><div class="prl">Church Settings</div><div class="prv">Edit name, contact, content</div></div><div class="prarr">›</div></div>
+        <div class="prof-row" onclick="toast('🔖 3 bookmarked sermons')"><div class="pric g-blue" style="border-radius:10px;">🔖</div><div><div class="prl">Bookmarked Sermons</div><div class="prv">3 saved</div></div><div class="prarr">›</div></div>
+        <div class="prof-row" onclick="go('prayer',6)"><div class="pric g-rose" style="border-radius:10px;">🙏</div><div><div class="prl">My Prayer Requests</div><div class="prv">View your requests</div></div><div class="prarr">›</div></div>
+        <div class="prof-row" onclick="toast('🔔 Notification settings')"><div class="pric g-teal" style="border-radius:10px;">🔔</div><div><div class="prl">Notifications</div><div class="prv">Manage your alerts</div></div><div class="prarr">›</div></div>
+        <div class="prof-row" onclick="doLogout()"><div class="pric g-dark" style="border-radius:10px;">🚪</div><div><div class="prl">Sign Out</div><div class="prv">Log out of ChurchHub</div></div><div class="prarr">›</div></div>
+      </div>
+    </div>
+
+  </div><!-- .content -->
+</div><!-- #app -->
+
+<!-- ═══════════════════════════════════════════
+   ADMIN PANEL SHEET
+═══════════════════════════════════════════ -->
+<div id="admin-panel" onclick="closeAdminPanel(event)">
+  <div class="ap-sheet">
+    <div class="ap-handle"></div>
+    <div class="ap-title">⚙️ Admin Dashboard</div>
+    <div class="ap-sec">Content</div>
+    <div class="ap-item" onclick="openModal('add-announcement');closeAdminPanel()"><div class="ap-icon g-royal">📢</div><div><div class="ap-label">Post Announcement</div><div class="ap-desc">Blast to all members</div></div></div>
+    <div class="ap-item" onclick="openModal('upload-media');closeAdminPanel()"><div class="ap-icon g-blue">📤</div><div><div class="ap-label">Upload Media</div><div class="ap-desc">Video, audio, posters, PDF</div></div></div>
+    <div class="ap-item" onclick="openModal('add-event');closeAdminPanel()"><div class="ap-icon g-purple">📅</div><div><div class="ap-label">Add Event</div><div class="ap-desc">Create a church event</div></div></div>
+    <div class="ap-item" onclick="openModal('edit-program');closeAdminPanel()"><div class="ap-icon g-teal">📋</div><div><div class="ap-label">Edit Weekly Program</div><div class="ap-desc">Update schedule</div></div></div>
+    <div class="ap-item" onclick="openModal('edit-leader');closeAdminPanel()"><div class="ap-icon g-gold">👑</div><div><div class="ap-label">Manage Leadership</div><div class="ap-desc">Add/edit leaders</div></div></div>
+    <div class="ap-sec">Members</div>
+    <div class="ap-item" onclick="openModal('add-member');closeAdminPanel()"><div class="ap-icon g-teal">👥</div><div><div class="ap-label">Add Member</div><div class="ap-desc">Register new member</div></div></div>
+    <div class="ap-item" onclick="toast('✨ 3 testimonies pending...');closeAdminPanel()"><div class="ap-icon g-rose">✨</div><div><div class="ap-label">Review Testimonies</div><div class="ap-desc">3 pending approval</div></div></div>
+    <div class="ap-item" onclick="toast('🙏 2 prayer requests pending...');closeAdminPanel()"><div class="ap-icon g-purple">🙏</div><div><div class="ap-label">Moderate Prayer Requests</div><div class="ap-desc">2 awaiting approval</div></div></div>
+    <div class="ap-sec">Settings</div>
+    <div class="ap-item" onclick="openSettings('church');closeAdminPanel()"><div class="ap-icon g-dark">⛪</div><div><div class="ap-label">Church Settings</div><div class="ap-desc">Name, slogan, contact, content</div></div></div>
+    <div class="ap-item" onclick="toast('🔔 Push sent to all members!');closeAdminPanel()"><div class="ap-icon g-blue">🔔</div><div><div class="ap-label">Send Push Notification</div><div class="ap-desc">Instant alert to all</div></div></div>
+    <button class="ap-close" onclick="closeAdminPanel()">Close</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ -->
+<div id="modal" onclick="closeModal(event)">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">Form</div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+   SETTINGS PANEL (Admin Only)
+═══════════════════════════════════════════ -->
+<div id="settings-panel">
+  <div class="sp-hdr">
+    <button class="sp-back" onclick="closeSettings()">‹</button>
+    <div class="sp-name">Church Settings</div>
+    <div style="margin-left:auto;" class="admin-pill">ADMIN</div>
+  </div>
+  <div class="sp-body">
+    <!-- Live Preview -->
+    <div class="sp-preview">
+      <div class="spv-lbl">✦ Live Preview</div>
+      <div class="spv-name" id="spv-name">Grace Community Church</div>
+      <div class="spv-slogan" id="spv-slogan">Connected in Faith · United in Love</div>
+      <div class="spv-badge"><div class="live-dot"></div> Changes reflect instantly</div>
+    </div>
+    <!-- Setting Tabs -->
+    <div class="stabs">
+      <div class="stab on" onclick="switchStab('s-church',this)">⛪ Church</div>
+      <div class="stab" onclick="switchStab('s-contact',this)">📞 Contact</div>
+      <div class="stab" onclick="switchStab('s-content',this)">📋 Content</div>
+      <div class="stab" onclick="switchStab('s-features',this)">✨ Features</div>
+      <div class="stab" onclick="switchStab('s-admin',this)">🔐 Admin</div>
+    </div>
+
+    <!-- Church Info -->
+    <div id="s-church">
+      <div class="sg">
+        <div class="sg-title"><span>⛪</span> Church Identity</div>
+        <div class="field-row"><div class="frl">Church Name <span style="font-size:9px;color:#ef4444;">REQUIRED</span></div><input class="fri" id="s-church-name" value="Grace Community Church" oninput="settingsLivePreview()"/><div class="fhint">Appears throughout the app</div><div class="fprev"><div class="fprev-l">Preview</div><span id="fprev-name">Grace Community Church</span></div></div>
+        <div class="field-row"><div class="frl">App Brand Name</div><input class="fri" id="s-app-name" value="ChurchHub" oninput="settingsLivePreview()"/></div>
+        <div class="field-row"><div class="frl">Slogan / Tagline</div><input class="fri" id="s-slogan" value="Connected in Faith · United in Love" oninput="settingsLivePreview()"/><div class="fprev"><div class="fprev-l">Preview</div><em id="fprev-slogan" style="font-size:12px;color:var(--purple);">Connected in Faith · United in Love</em></div></div>
+        <div class="field-row"><div class="frl">Church Description</div><textarea class="frt" id="s-desc">A vibrant Spirit-filled community passionate about worship, prayer and making disciples for Christ.</textarea></div>
+        <div class="field-row"><div class="frl">Denomination</div><input class="fri" id="s-denom" value="Pentecostal" placeholder="e.g. Baptist, Pentecostal…"/></div>
+        <div class="field-row"><div class="frl">Founded Year</div><input class="fri" id="s-founded" value="1998"/></div>
+      </div>
+      <div class="sg">
+        <div class="sg-title"><span>📍</span> Address</div>
+        <div class="field-row"><div class="frl">Street Address</div><input class="fri" id="s-street" value="123 Faith Avenue"/></div>
+        <div class="field-row"><div class="frl">City</div><input class="fri" id="s-city" value="Grace District"/></div>
+        <div class="field-row"><div class="frl">Country</div><input class="fri" id="s-country" value=""/></div>
+        <div class="field-row"><div class="frl">Google Maps Link</div><input class="fri" id="s-maps" value="" placeholder="Paste Google Maps URL"/></div>
+      </div>
+      <div class="sg">
+        <div class="sg-title"><span>⏰</span> Service Times</div>
+        <div class="field-row"><div class="frl">Sunday Morning</div><input class="fri" id="s-svc1" value="10:00 AM"/></div>
+        <div class="field-row"><div class="frl">Sunday School</div><input class="fri" id="s-svc2" value="9:30 AM"/></div>
+        <div class="field-row"><div class="frl">Midweek Service</div><input class="fri" id="s-svc3" value="Wednesday 6:30 PM"/></div>
+        <div class="field-row"><div class="frl">Other Services</div><textarea class="frt" id="s-svc4" placeholder="e.g. Friday Prayer Night — 7:00 PM"></textarea></div>
+      </div>
+    </div>
+
+    <!-- Contact -->
+    <div id="s-contact" style="display:none;">
+      <div class="sg">
+        <div class="sg-title"><span>📞</span> Phone & Email</div>
+        <div class="field-row"><div class="frl">Main Phone</div><input class="fri" id="s-phone" value="+1 (234) 567-8900"/></div>
+        <div class="field-row"><div class="frl">WhatsApp</div><input class="fri" id="s-whatsapp" value="+1 (234) 567-8901"/></div>
+        <div class="field-row"><div class="frl">Church Email</div><input class="fri" id="s-email" value="info@gracechurch.org"/></div>
+        <div class="field-row"><div class="frl">Website</div><input class="fri" id="s-website" value="www.gracechurch.org"/></div>
+      </div>
+      <div class="sg">
+        <div class="sg-title"><span>📱</span> Social Media</div>
+        <div class="field-row"><div class="frl">Facebook</div><input class="fri" id="s-fb" value="Grace Community Church"/></div>
+        <div class="field-row"><div class="frl">Instagram</div><input class="fri" id="s-ig" value="@gracecommunity"/></div>
+        <div class="field-row"><div class="frl">YouTube</div><input class="fri" id="s-yt" value="Grace Community Church"/></div>
+        <div class="field-row"><div class="frl">Twitter / X</div><input class="fri" id="s-tw" value="" placeholder="@yourchurch (optional)"/></div>
+        <div class="field-row"><div class="frl">TikTok</div><input class="fri" id="s-tt" value="" placeholder="@yourchurch (optional)"/></div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div id="s-content" style="display:none;">
+      <div class="sg">
+        <div class="sg-title"><span>🏠</span> Homepage</div>
+        <div class="field-row"><div class="frl">Next Sermon Title</div><input class="fri" id="s-sermon-title" value="Walking in the Spirit"/><div class="fhint">Shows on the homepage spotlight card</div></div>
+        <div class="field-row"><div class="frl">Sermon Speaker</div><input class="fri" id="s-sermon-spk" value="Pastor James Adeyemi"/></div>
+        <div class="field-row"><div class="frl">Welcome Message</div><textarea class="frt" id="s-welcome">Welcome to Grace Community Church — where every soul matters and every life is transformed by God's love.</textarea></div>
+      </div>
+      <div class="sg">
+        <div class="sg-title"><span>📖</span> Daily Verses</div>
+        <div style="padding:10px 14px 4px;font-size:12px;color:var(--muted);">These rotate on the homepage verse card.</div>
+        <div id="verse-list-settings">
+          <div class="field-row" style="flex-direction:row;align-items:center;gap:10px;"><div style="flex:1;"><div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;">"For I know the plans I have for you…"</div><div style="font-size:11px;color:var(--purple);font-weight:600;margin-top:2px;">Jeremiah 29:11</div></div><div style="color:#ef4444;cursor:pointer;font-size:16px;" onclick="toast('🗑 Verse removed')">✕</div></div>
+          <div class="field-row" style="flex-direction:row;align-items:center;gap:10px;"><div style="flex:1;"><div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;">"I can do all things through Christ…"</div><div style="font-size:11px;color:var(--purple);font-weight:600;margin-top:2px;">Philippians 4:13</div></div><div style="color:#ef4444;cursor:pointer;font-size:16px;" onclick="toast('🗑 Verse removed')">✕</div></div>
+        </div>
+        <div class="field-row">
+          <div class="frl">Add New Verse</div>
+          <textarea class="frt" id="s-new-verse" placeholder='"For God so loved the world…"'></textarea>
+          <input class="fri" id="s-new-ref" placeholder="e.g. John 3:16" style="margin-top:6px;"/>
+          <button style="width:100%;padding:10px;border-radius:10px;background:linear-gradient(135deg,var(--purple),var(--blue));color:var(--gold);font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;border:none;cursor:pointer;margin-top:6px;" onclick="addVerse()">+ Add Verse</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div id="s-features" style="display:none;">
+      <div class="sg">
+        <div class="sg-title"><span>✨</span> Feature Toggles</div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Prayer Wall</div><div class="tr-desc">Members can submit prayer requests</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Testimony Wall</div><div class="tr-desc">Members can submit testimonies</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Birthday Wall</div><div class="tr-desc">Show member birthdays</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Member Comments</div><div class="tr-desc">Allow comments on sermons & events</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Reactions (Amen/🙌/❤️)</div><div class="tr-desc">Allow reactions on posts</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Event RSVP</div><div class="tr-desc">Members can RSVP to events</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Countdown Timer</div><div class="tr-desc">Live countdown on homepage</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Approve Prayers Before Posting</div><div class="tr-desc">Review before showing publicly</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Approve Testimonies Before Posting</div><div class="tr-desc">Review before publishing</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">Allow New Member Registration</div><div class="tr-desc">Members can sign up via the app</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+
+    <!-- Admin -->
+    <div id="s-admin" style="display:none;">
+      <div class="sg">
+        <div class="sg-title"><span>🔐</span> Admin Credentials</div>
+        <div style="padding:9px 14px;background:rgba(200,169,81,.07);border-bottom:1px solid rgba(200,169,81,.12);font-size:11px;color:var(--gold-d);">⚠️ Change these from the defaults immediately!</div>
+        <div class="field-row"><div class="frl">Admin Email</div><input class="fri" id="s-admin-email" value="admin@church.com" type="email"/></div>
+        <div class="field-row"><div class="frl">Current Password</div><input class="fri" type="password" placeholder="Current password"/></div>
+        <div class="field-row"><div class="frl">New Password</div><input class="fri" id="s-admin-pass" type="password" placeholder="New password (8+ chars)"/></div>
+        <div class="field-row"><div class="frl">Confirm Password</div><input class="fri" type="password" placeholder="Repeat new password"/></div>
+      </div>
+      <div class="sg">
+        <div class="sg-title"><span>👤</span> Admin Profile</div>
+        <div class="field-row"><div class="frl">Your Name</div><input class="fri" id="s-admin-name" value="Church Admin"/></div>
+        <div class="field-row"><div class="frl">Your Title</div><input class="fri" id="s-admin-title" value="Church Administrator"/></div>
+      </div>
+      <div class="sg">
+        <div class="sg-title"><span>🔔</span> Admin Notifications</div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">New Prayer Requests</div><div class="tr-desc">Alert when a member submits</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">New Testimonies</div><div class="tr-desc">Alert for new submissions</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div class="toggle-row"><div class="tr-info"><div class="tr-label">New Member Registrations</div><div class="tr-desc">Alert when someone joins</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+      <div style="margin:14px 16px;background:rgba(239,68,68,.04);border:1px solid rgba(239,68,68,.15);border-radius:var(--r);padding:14px 16px;">
+        <div style="font-weight:700;font-size:13px;color:#dc2626;margin-bottom:4px;">⚠️ Danger Zone</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">These actions are irreversible.</div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button style="padding:9px 16px;border-radius:10px;background:transparent;border:1.5px solid #dc2626;color:#dc2626;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer;" onclick="toast('⚠️ All announcements cleared!')">Clear All Announcements</button>
+          <button style="padding:9px 16px;border-radius:10px;background:transparent;border:1.5px solid #dc2626;color:#dc2626;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer;" onclick="toast('⚠️ All events cleared!')">Clear All Events</button>
+        </div>
+      </div>
+      <div style="height:14px;"></div>
+    </div>
+  </div>
+  <!-- Save Bar -->
+  <div class="sp-save">
+    <button style="padding:13px 18px;border-radius:13px;background:var(--ow);color:var(--purple);font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;border:1.5px solid #e0d8f0;cursor:pointer;" onclick="closeSettings()">Cancel</button>
+    <button class="sp-save-btn" onclick="saveSettings()">💾 &nbsp;Save All Changes</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════
+//  STATE
+// ═══════════════════════════════════════════
+let CU = null, isAdmin = false;
+let curPageIdx = 0;
+const pageOrder = ['home','sermons','events','program','members','leaders','prayer','testimony','birthdays','contact','profile'];
+const players = {};
+let verseIdx = 0;
+
+// Church settings (loaded from localStorage)
+let settings = {
+  churchName: 'Grace Community Church',
+  appName: 'ChurchHub',
+  slogan: 'Connected in Faith · United in Love',
+  phone: '+1 (234) 567-8900',
+  whatsapp: '+1 (234) 567-8901',
+  email: 'info@gracechurch.org',
+  website: 'www.gracechurch.org',
+  facebook: 'Grace Community Church',
+  instagram: '@gracecommunity',
+  youtube: 'Grace Community Church',
+  address: '123 Faith Avenue, Grace District',
+  sermonTitle: 'Walking in the Spirit',
+  sermonSpeaker: 'Pastor James Adeyemi',
+};
+
+const verses = [
+  {text:'"For I know the plans I have for you — plans to prosper you and not to harm you, plans to give you hope and a future."',ref:'— Jeremiah 29:11'},
+  {text:'"I can do all things through Christ who strengthens me."',ref:'— Philippians 4:13'},
+  {text:'"Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him."',ref:'— Proverbs 3:5-6'},
+];
+
+// ═══════════════════════════════════════════
+//  SPLASH
+// ═══════════════════════════════════════════
+// Generate star particles
+const sw = document.getElementById('stars-wrap');
+for(let i=0;i<28;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${2+Math.random()*3}s;animation-delay:${Math.random()*4}s;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;`;
+  sw.appendChild(s);
+}
+// Splash dot particles
+const spd=document.getElementById('sp-dots');
+for(let i=0;i<6;i++){
+  const d=document.createElement('div');d.className='sp-dot';
+  d.style.cssText=`left:${20+Math.random()*60}%;top:${20+Math.random()*60}%;animation-duration:${1+Math.random()*.8}s;animation-delay:${.8+Math.random()*.6}s;`;
+  spd.appendChild(d);
+}
+setTimeout(()=>{
+  document.getElementById('splash').classList.add('exit');
+  setTimeout(()=>{
+    document.getElementById('splash').style.display='none';
+    document.getElementById('auth').classList.add('show');
+  },450);
+},2700);
+
+// ═══════════════════════════════════════════
+//  AUTH
+// ═══════════════════════════════════════════
+function switchAuth(t){
+  document.querySelectorAll('.at').forEach((el,i)=>el.classList.toggle('on',(i===0&&t==='login')||(i===1&&t==='register')));
+  document.getElementById('login-form').style.display=t==='login'?'block':'none';
+  document.getElementById('reg-form').style.display=t==='register'?'block':'none';
+}
+function doLogin(){
+  const e=document.getElementById('le').value.trim(),p=document.getElementById('lp').value;
+  if(!e||!p){toast('⚠️ Please fill in all fields');return;}
+  if(e==='admin@church.com'&&p==='admin123'){loginUser({name:'Church Admin',email:e,dept:'Administrator',initials:'AD'},true);}
+  else if(e==='member@church.com'&&p==='member123'){loginUser({name:'Demo Member',email:e,dept:'General Member',initials:'DM'},false);}
+  else if(e&&p.length>=6){
+    const n=e.split('@')[0].split('.').map(w=>w[0].toUpperCase()+w.slice(1)).join(' ');
+    const ini=n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    loginUser({name:n,email:e,dept:'General Member',initials:ini},false);
+  }else{toast('❌ Try admin@church.com / admin123');}
+}
+function doRegister(){
+  const n=document.getElementById('rn').value.trim(),e=document.getElementById('re').value.trim(),p=document.getElementById('rp').value,d=document.getElementById('rd').value;
+  if(!n||!e||!p){toast('⚠️ Fill all required fields');return;}
+  if(p.length<6){toast('⚠️ Password needs 6+ characters');return;}
+  const ini=n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  loginUser({name:n,email:e,dept:d,initials:ini},false);
+}
+function loginUser(user,admin){
+  CU=user;isAdmin=admin;
+  document.getElementById('auth').classList.add('hide');
+  const app=document.getElementById('app');app.classList.add('show');
+  document.getElementById('hdr-av').textContent=user.initials;
+  document.getElementById('admin-badge').style.display=admin?'inline-block':'none';
+  document.getElementById('admin-gear').style.display=admin?'flex':'none';
+  document.getElementById('admin-settings-row').style.display=admin?'flex':'none';
+  document.getElementById('prof-av').textContent=user.initials;
+  document.getElementById('prof-name').textContent=user.name;
+  document.getElementById('prof-role').textContent=user.dept;
+  document.querySelectorAll('#cav1,#cav2').forEach(el=>el.textContent=user.initials);
+  document.querySelectorAll('#cname1').forEach(el=>el.textContent=user.name);
+  document.querySelectorAll('.ab').forEach(b=>b.classList.toggle('show',admin));
+  document.getElementById('user-upload-z').style.display=admin?'none':'block';
+  loadSettings();
+  updateGreeting();
+  animateStats();
+  startCountdown();
+  setTimeout(()=>toast(`👋 Welcome${admin?' back, Admin':''},  ${user.name.split(' ')[0]}!`),400);
+}
+function doLogout(){
+  CU=null;isAdmin=false;
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('app').style.display='none';
+  setTimeout(()=>{
+    document.getElementById('app').style.display='flex';
+    document.getElementById('auth').classList.remove('hide');
+    document.getElementById('le').value='';document.getElementById('lp').value='';
+  },50);
+  toast('👋 Signed out. See you soon!');
+}
+
+// ═══════════════════════════════════════════
+//  NAVIGATION
+// ═══════════════════════════════════════════
+function go(pageId,tabIdx){
+  const tabs=document.querySelectorAll('.tab');
+  const newIdx=pageOrder.indexOf(pageId);
+  const dir=newIdx>=curPageIdx?'forward':'back';
+  const cur=document.querySelector('.page.active');
+  const next=document.getElementById('page-'+pageId);
+  if(!next||cur===next)return;
+  tabs[tabIdx]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  next.classList.remove('active','exit-l','exit-r','enter-r','enter-l');
+  next.classList.add(dir==='forward'?'enter-r':'enter-l');
+  next.offsetHeight;
+  cur.classList.remove('active');
+  cur.classList.add(dir==='forward'?'exit-l':'exit-r');
+  next.classList.remove('enter-l','enter-r');
+  next.classList.add('active');
+  tabs.forEach(t=>t.classList.remove('active'));
+  if(tabs[tabIdx])tabs[tabIdx].classList.add('active');
+  next.scrollTop=0;
+  next.querySelectorAll('.si').forEach(el=>{el.style.animation='none';el.offsetHeight;el.style.animation='';});
+  setTimeout(()=>cur.classList.remove('exit-l','exit-r'),300);
+  curPageIdx=newIdx;
+}
+
+// ═══════════════════════════════════════════
+//  ADMIN PANEL
+// ═══════════════════════════════════════════
+function openAdminPanel(){
+  if(!isAdmin)return;
+  const p=document.getElementById('admin-panel');
+  p.style.display='flex';requestAnimationFrame(()=>p.classList.add('show'));
+}
+function closeAdminPanel(e){
+  if(!e||e.target===document.getElementById('admin-panel')){
+    const p=document.getElementById('admin-panel');
+    p.classList.remove('show');setTimeout(()=>p.style.display='none',250);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  MODAL
+// ═══════════════════════════════════════════
+const modals={
+  'add-announcement':{title:'📢 Post Announcement',html:`<label class="fl">Type</label><select class="fs"><option>⛪ Sunday Service</option><option>📢 General</option><option>🎵 Choir</option><option>👶 Youth</option></select><label class="fl">Title</label><input class="fi" placeholder="Announcement title…"/><label class="fl">Message</label><textarea class="ft" placeholder="Message to congregation…"></textarea><label class="fl">Send Via</label><div class="pills"><div class="pill on" onclick="this.classList.toggle('on')">📱 Push</div><div class="pill on" onclick="this.classList.toggle('on')">📧 Email</div><div class="pill" onclick="this.classList.toggle('on')">💬 WhatsApp</div><div class="pill" onclick="this.classList.toggle('on')">📲 SMS</div></div><button class="btn-primary rip" onclick="toast('✅ Sent to all members!');closeModal()">Send Announcement</button><button class="btn-cancel" onclick="closeModal()">Cancel</button>`},
+  'upload-media':{title:'📤 Upload Media',html:`<label class="fl">Media Type</label><select class="fs"><option>🎬 Sermon Video</option><option>🎵 Audio Sermon</option><option>🎨 Church Poster</option><option>📸 Photos</option><option>📄 Sermon Notes (PDF)</option><option>📋 Church Bulletin (PDF)</option></select><label class="fl">Title</label><input class="fi" placeholder="e.g. Sunday Sermon — Mar 22"/><div class="upload-z" onclick="toast('📁 File picker opens here')"><div style="font-size:30px;margin-bottom:5px;">📁</div><p style="font-size:12px;color:var(--muted);"><strong style="color:var(--purple);">Tap to select file</strong><br/>Video, audio, image or PDF</p></div><button class="btn-primary rip" onclick="toast('✅ Media uploaded!');closeModal()">Upload</button><button class="btn-cancel" onclick="closeModal()">Cancel</button>`},
+  'add-event':{title:'📅 Add New Event',html:`<label class="fl">Event Name</label><input class="fi" placeholder="e.g. Midweek Bible Study"/><label class="fl">Date</label><input class="fi" type="date"/><label class="fl">Start & End Time</label><div style="display:flex;gap:8px;"><input class="fi" style="flex:1;" placeholder="Start"/><input class="fi" style="flex:1;" placeholder="End"/></div><label class="fl">Location</label><input class="fi" placeholder="e.g. Main Sanctuary"/><label class="fl">Description</label><textarea class="ft" style="height:65px;" placeholder="Event details…"></textarea><button class="btn-primary rip" onclick="toast('✅ Event added!');closeModal()">Add Event</button><button class="btn-cancel" onclick="closeModal()">Cancel</button>`},
+  'add-member':{title:'👥 Add Member',html:`<label class="fl">Full Name</label><input class="fi" placeholder="Full name"/><label class="fl">Email</label><input class="fi" type="email" placeholder="Email"/><label class="fl">Phone</label><input class="fi" type="tel" placeholder="Phone"/><label class="fl">Department</label><select class="fs"><option>General Member</option><option>Choir</option><option>Youth</option><option>Prayer Team</option><option>Leadership</option></select><button class="btn-primary rip" onclick="toast('✅ Member added!');closeModal()">Add Member</button><button class="btn-cancel" onclick="closeModal()">Cancel</button>`},
+  'edit-leader':{title:'👑 Edit Leader',html:`<label class="fl">Select Leader</label><select class="fs"><option>Pastor James Adeyemi</option><option>Pastor Deborah Adeyemi</option><option>Grace Nwosu</option><option>Samuel Okafor</option><option>+ Add New Leader</option></select><label class="fl">Title</label><input class="fi" placeholder="e.g. Senior Pastor"/><label class="fl">Full Name</label><input class="fi" placeholder="Full name"/><label class="fl">Bio</label><textarea class="ft" placeholder="Biography…"></textarea><label class="fl">Email</label><input class="fi" type="email" placeholder="Email"/><button class="btn-primary rip" onclick="toast('✅ Profile updated!');closeModal()">Save Changes</button><button class="btn-cancel" onclick="closeModal()">Cancel</button>`},
+  'edit-program':{title:'📋 Edit Schedule',html:`<label class="fl">Day</label><select class="fs"><option>Sunday</option><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Friday</option><option>Saturday</option></select><label class="fl">Activity</label><input class="fi" placeholder="Activity name"/><label class="fl">Time</label><input class="fi" placeholder="e.g. 6:00 AM"/><label class="fl">Location</label><input class="fi" placeholder="e.g. Prayer Hall"/><button class="btn-primary rip" onclick="toast('✅ Schedule updated!');closeModal()">Save</button><button class="btn-cancel" onclick="closeModal()">Cancel</button>`},
+};
+function openModal(key){
+  const f=modals[key];if(!f)return;
+  document.getElementById('modal-title').textContent=f.title;
+  document.getElementById('modal-body').innerHTML=f.html;
+  const m=document.getElementById('modal');m.style.display='flex';requestAnimationFrame(()=>m.classList.add('show'));
+}
+function closeModal(e){
+  if(!e||e.target===document.getElementById('modal')){
+    const m=document.getElementById('modal');m.classList.remove('show');setTimeout(()=>m.style.display='none',280);
+  }
+}
+
+// ═══════════════════════════════════════════
+//  SETTINGS PANEL
+// ═══════════════════════════════════════════
+function openSettings(tab){
+  const p=document.getElementById('settings-panel');
+  p.style.display='flex';
+  requestAnimationFrame(()=>p.classList.add('show'));
+  if(tab)switchStab('s-'+tab, document.querySelector(`.stab[onclick*="${tab}"]`)||document.querySelector('.stab'));
+}
+function closeSettings(){
+  const p=document.getElementById('settings-panel');
+  p.classList.remove('show');setTimeout(()=>p.style.display='none',300);
+}
+function switchStab(id,el){
+  document.querySelectorAll('#settings-panel [id^="s-"]').forEach(d=>{if(['s-church','s-contact','s-content','s-features','s-admin'].includes(d.id))d.style.display='none';});
+  document.getElementById(id).style.display='block';
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('on'));
+  if(el)el.classList.add('on');
+}
+function settingsLivePreview(){
+  const name=document.getElementById('s-church-name').value||'Your Church';
+  const slogan=document.getElementById('s-slogan').value||'Your Slogan';
+  document.getElementById('spv-name').textContent=name;
+  document.getElementById('spv-slogan').textContent=slogan;
+  document.getElementById('fprev-name').textContent=name;
+  document.getElementById('fprev-slogan').textContent=slogan;
+}
+function saveSettings(){
+  settings.churchName=document.getElementById('s-church-name').value||settings.churchName;
+  settings.appName=document.getElementById('s-app-name').value||settings.appName;
+  settings.slogan=document.getElementById('s-slogan').value||settings.slogan;
+  settings.phone=document.getElementById('s-phone').value||settings.phone;
+  settings.whatsapp=document.getElementById('s-whatsapp').value||settings.whatsapp;
+  settings.email=document.getElementById('s-email').value||settings.email;
+  settings.website=document.getElementById('s-website').value||settings.website;
+  settings.facebook=document.getElementById('s-fb').value||settings.facebook;
+  settings.instagram=document.getElementById('s-ig').value||settings.instagram;
+  settings.youtube=document.getElementById('s-yt').value||settings.youtube;
+  settings.sermonTitle=document.getElementById('s-sermon-title').value||settings.sermonTitle;
+  settings.sermonSpeaker=document.getElementById('s-sermon-spk').value||settings.sermonSpeaker;
+  try{localStorage.setItem('churchhub_s',JSON.stringify(settings));}catch(e){}
+  applySettings();
+  closeSettings();
+  toast('✅ Settings saved & applied!');
+}
+function loadSettings(){
+  try{
+    const s=localStorage.getItem('churchhub_s');
+    if(s)settings=Object.assign(settings,JSON.parse(s));
+  }catch(e){}
+  applySettings();
+}
+function applySettings(){
+  // Update all displayed elements
+  document.getElementById('hdr-app-name').textContent=settings.appName;
+  document.getElementById('hdr-church-sub').textContent=settings.churchName;
+  document.getElementById('hero-app-name').textContent=settings.appName;
+  document.getElementById('hero-slogan').textContent=settings.slogan;
+  document.getElementById('auth-church-sub').textContent=settings.churchName;
+  document.getElementById('contact-church-name').textContent=settings.churchName;
+  document.getElementById('ss-sermon-title').textContent='"'+settings.sermonTitle+'"';
+  document.getElementById('ss-speaker').textContent=settings.sermonSpeaker;
+  document.getElementById('c-phone-disp').textContent=settings.phone;
+  document.getElementById('c-email-disp').textContent=settings.email;
+  document.getElementById('c-whatsapp-disp').textContent=settings.whatsapp;
+  document.getElementById('c-website-disp').textContent=settings.website;
+  document.getElementById('c-fb-disp').textContent=settings.facebook;
+  document.getElementById('c-ig-disp').textContent=settings.instagram;
+  document.getElementById('c-yt-disp').textContent=settings.youtube;
+  document.getElementById('c-addr-disp').textContent=settings.address;
+  // Pre-fill settings fields
+  try{
+    document.getElementById('s-church-name').value=settings.churchName;
+    document.getElementById('s-app-name').value=settings.appName;
+    document.getElementById('s-slogan').value=settings.slogan;
+    document.getElementById('s-phone').value=settings.phone;
+    document.getElementById('s-whatsapp').value=settings.whatsapp;
+    document.getElementById('s-email').value=settings.email;
+    document.getElementById('s-website').value=settings.website;
+    document.getElementById('s-fb').value=settings.facebook;
+    document.getElementById('s-ig').value=settings.instagram;
+    document.getElementById('s-yt').value=settings.youtube;
+    document.getElementById('s-sermon-title').value=settings.sermonTitle;
+    document.getElementById('s-sermon-spk').value=settings.sermonSpeaker;
+  }catch(e){}
+}
+
+// ═══════════════════════════════════════════
+//  INTERACTIONS
+// ═══════════════════════════════════════════
+function react(btn){
+  btn.classList.toggle('on');
+  const sp=btn.querySelector('span:last-child')||btn.querySelector('span');
+  if(sp&&/^\d+$/.test(sp.textContent.trim()))sp.textContent=parseInt(sp.textContent)+(btn.classList.contains('on')?1:-1);
+}
+function rsvp(btn){
+  const on=!btn.classList.contains('going');
+  btn.classList.toggle('going',on);btn.textContent=on?'✅ Going':'RSVP';
+  const cnt=btn.nextElementSibling;
+  if(cnt&&cnt.classList.contains('rsvp-cnt')){const n=parseInt(cnt.textContent);cnt.textContent=(on?n+1:n-1)+' going';}
+  toast(on?'✅ RSVP confirmed! See you there!':'RSVP removed');
+}
+function pray(btn){
+  const on=!btn.dataset.on;btn.dataset.on=on;
+  btn.textContent=on?'🙏 Praying…':"🙏 I'm Praying for This";
+  btn.style.background=on?'linear-gradient(135deg,var(--purple),var(--blue))':'';
+  btn.style.color=on?'var(--gold)':'';
+  if(on)toast('🙏 Added to your prayer list!');
+}
+function toggleBkm(el){
+  const saved=el.textContent==='🔖';el.textContent=saved?'🏷️':'🔖';
+  toast(saved?'🔖 Saved to bookmarks!':'Bookmark removed');
+}
+function addComment(input){
+  const text=input.value.trim();if(!text)return;
+  const section=input.closest('.comments');
+  const row=input.closest('.ci-row');
+  const ini=CU?CU.initials:'?';const name=CU?CU.name:'You';
+  const div=document.createElement('div');div.className='comment-item';
+  div.innerHTML=`<div class="ci-av g-royal" style="width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--gold);flex-shrink:0;font-family:'Cormorant Garamond',serif;">${ini}</div><div class="cm-bubble"><div class="cm-name">${name}</div><div class="cm-text">${text}</div><div class="cm-time">Just now</div></div>`;
+  section.insertBefore(div,row);input.value='';toast('💬 Comment posted!');
+}
+function submitPrayer(){
+  const name=document.getElementById('pr-name').value.trim();
+  const text=document.getElementById('pr-text').value.trim();
+  const anon=document.getElementById('pr-anon').checked;
+  if(!text){toast('⚠️ Please write your prayer request');return;}
+  const dName=anon?'Anonymous':(name||(CU?CU.name:'Anonymous'));
+  const ini=anon?'AN':(CU?CU.initials:'ME');
+  const div=document.createElement('div');div.className='prayer-card';
+  div.style.cssText='border:1px solid rgba(200,169,81,.2);animation:staggerIn .3s cubic-bezier(.2,0,0,1) both;';
+  div.innerHTML=`<div class="pr-hdr"><div class="pr-av g-gold">${ini}</div><div><div class="pr-nm">${dName}</div></div><span class="pr-st badge-pend">Pending</span><div class="pr-time">Just now</div></div><div class="pr-txt">${text}</div><div class="reactions" style="margin-bottom:8px;"><button class="rb" onclick="react(this)">🙏 <span>0</span></button><button class="rb" onclick="react(this)">❤️ <span>0</span></button></div><button class="pray-btn" onclick="pray(this)">🙏 I'm Praying for This</button>`;
+  document.getElementById('prayer-list').insertBefore(div,document.getElementById('prayer-list').firstChild);
+  document.getElementById('pr-name').value='';document.getElementById('pr-text').value='';document.getElementById('pr-anon').checked=false;
+  toast('🙏 Submitted — pending admin approval');
+}
+function submitTestimony(){
+  const text=document.getElementById('test-text').value.trim();
+  if(!text){toast('⚠️ Please write your testimony');return;}
+  document.getElementById('test-name').value='';document.getElementById('test-text').value='';
+  toast('✨ Testimony submitted! Admin will review shortly.');
+}
+function filterM(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('#mlist .member').forEach(el=>{el.style.display=el.querySelector('.m-name').textContent.toLowerCase().includes(q)?'':'none';});
+}
+function addVerse(){
+  const text=document.getElementById('s-new-verse').value.trim();
+  const ref=document.getElementById('s-new-ref').value.trim();
+  if(!text){toast('⚠️ Enter verse text');return;}
+  if(!ref){toast('⚠️ Enter Bible reference');return;}
+  const n=document.querySelectorAll('#verse-list-settings .field-row').length+1;
+  const div=document.createElement('div');div.className='field-row';
+  div.style.cssText='flex-direction:row;align-items:center;gap:10px;opacity:0;transform:translateY(8px);transition:all .3s ease;';
+  div.innerHTML=`<div style="flex:1;"><div style="font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;">"${text.replace(/^[""]/,'').replace(/[""]$/,'')}"</div><div style="font-size:11px;color:var(--purple);font-weight:600;margin-top:2px;">${ref}</div></div><div style="color:#ef4444;cursor:pointer;font-size:16px;" onclick="this.closest('.field-row').remove();toast('🗑 Verse removed')">✕</div>`;
+  document.getElementById('verse-list-settings').appendChild(div);
+  requestAnimationFrame(()=>{div.style.opacity='1';div.style.transform='none';});
+  document.getElementById('s-new-verse').value='';document.getElementById('s-new-ref').value='';
+  toast('📖 Verse added!');
+}
+
+// ═══════════════════════════════════════════
+//  AUDIO PLAYER
+// ═══════════════════════════════════════════
+function playAudio(btn,id){
+  if(players[id]){clearInterval(players[id].iv);delete players[id];btn.textContent='▶';return;}
+  Object.keys(players).forEach(k=>{clearInterval(players[k].iv);players[k].btn.textContent='▶';const b=document.getElementById(k);if(b)b.style.width='0%';delete players[k];});
+  btn.textContent='⏸';let pct=0;
+  const bar=document.getElementById(id);
+  const iv=setInterval(()=>{pct=Math.min(pct+.22,100);if(bar)bar.style.width=pct+'%';if(pct>=100){clearInterval(iv);btn.textContent='▶';delete players[id];toast('✅ Audio finished');}},100);
+  players[id]={iv,btn};
+}
+
+// ═══════════════════════════════════════════
+//  VERSE ROTATOR
+// ═══════════════════════════════════════════
+function setVerse(i){
+  verseIdx=i;
+  const vt=document.getElementById('vc-text');
+  vt.style.opacity='0';vt.style.transform='translateY(6px)';
+  setTimeout(()=>{
+    document.getElementById('vc-text').textContent=verses[i].text;
+    document.getElementById('vc-ref').textContent=verses[i].ref;
+    vt.style.transition='opacity .3s ease,transform .3s ease';vt.style.opacity='1';vt.style.transform='none';
+  },200);
+  document.querySelectorAll('.vd').forEach((d,j)=>d.classList.toggle('on',j===i));
+}
+setInterval(()=>setVerse((verseIdx+1)%verses.length),5500);
+
+// ═══════════════════════════════════════════
+//  GREETING
+// ═══════════════════════════════════════════
+function updateGreeting(){
+  const h=new Date().getHours();
+  const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+  const el=document.getElementById('hero-greet');
+  if(el)el.textContent=g+', '+settings.churchName;
+}
+
+// ═══════════════════════════════════════════
+//  STAT COUNTERS
+// ═══════════════════════════════════════════
+function animateStats(){
+  function count(id,target){
+    let n=0;const step=target/(1200/16);
+    const t=setInterval(()=>{n=Math.min(n+step,target);document.getElementById(id).textContent=Math.floor(n);if(n>=target)clearInterval(t);},16);
+  }
+  count('stat-m',148);count('stat-p',63);count('stat-o',12);count('stat-e',5);
+}
+
+// ═══════════════════════════════════════════
+//  COUNTDOWN
+// ═══════════════════════════════════════════
+function startCountdown(){
+  function update(){
+    const now=new Date();
+    const target=new Date();
+    const day=target.getDay();
+    const dUntil=(7-day)%7||7;
+    target.setDate(target.getDate()+dUntil);target.setHours(10,0,0,0);
+    const diff=target-now;if(diff<=0)return;
+    document.getElementById('cd-d').textContent=Math.floor(diff/86400000);
+    document.getElementById('cd-h').textContent=String(Math.floor((diff%86400000)/3600000)).padStart(2,'0');
+    document.getElementById('cd-m').textContent=String(Math.floor((diff%3600000)/60000)).padStart(2,'0');
+    document.getElementById('cd-s').textContent=String(Math.floor((diff%60000)/1000)).padStart(2,'0');
+  }
+  update();setInterval(update,1000);
+}
+
+// ═══════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2700);
+}
+
+// ═══════════════════════════════════════════
+//  PWA SERVICE WORKER REGISTRATION
+// ═══════════════════════════════════════════
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').then(()=>console.log('✅ SW registered')).catch(()=>{});
+  });
+}
+</script><!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ── YOUR SUPABASE KEYS (from Step 3) ──
+  const SUPABASE_URL  = 'https://YOUR-PROJECT-ID.supabase.co';
+  const SUPABASE_KEY  = 'YOUR-LONG-ANON-KEY-HERE';
+
+  const { createClient } = supabase;
+  const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  // Make available globally
+  window._db = db;
+
+  // ── AUTH FUNCTIONS ──
+  async function signUp(email, password, name, dept) {
+    const { data, error } = await db.auth.signUp({ email, password });
+    if (error) { toast('❌ ' + error.message); return null; }
+    // Create member profile
+    await db.from('members').insert({
+      user_id: data.user.id,
+      full_name: name,
+      email: email,
+      department: dept || 'General Member',
+      role: 'Member',
+      is_admin: false
+    });
+    return data.user;
+  }
+
+  async function signIn(email, password) {
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+    if (error) { toast('❌ ' + error.message); return null; }
+    return data.user;
+  }
+
+  async function checkIsAdmin(userId) {
+    const { data } = await db.from('members').select('is_admin').eq('user_id', userId).single();
+    return data?.is_admin === true;
+  }
+
+  async function loadChurchSettings() {
+    const { data } = await db.from('church_settings').select('*').eq('id', 1).single();
+    if (data) {
+      if (data.church_name) settings.churchName = data.church_name;
+      if (data.app_name)    settings.appName    = data.app_name;
+      if (data.slogan)      settings.slogan     = data.slogan;
+      if (data.phone)       settings.phone      = data.phone;
+      if (data.whatsapp)    settings.whatsapp   = data.whatsapp;
+      if (data.email)       settings.email      = data.email;
+      if (data.website)     settings.website    = data.website;
+      if (data.address)     settings.address    = data.address;
+      if (data.facebook)    settings.facebook   = data.facebook;
+      if (data.instagram)   settings.instagram  = data.instagram;
+      if (data.youtube)     settings.youtube    = data.youtube;
+      if (data.sermon_title)   settings.sermonTitle   = data.sermon_title;
+      if (data.sermon_speaker) settings.sermonSpeaker = data.sermon_speaker;
+      applySettings();
+    }
+  }
+
+  async function saveChurchSettingsToDB() {
+    await db.from('church_settings').update({
+      church_name:     settings.churchName,
+      app_name:        settings.appName,
+      slogan:          settings.slogan,
+      phone:           settings.phone,
+      whatsapp:        settings.whatsapp,
+      email:           settings.email,
+      website:         settings.website,
+      address:         settings.address,
+      facebook:        settings.facebook,
+      instagram:       settings.instagram,
+      youtube:         settings.youtube,
+      sermon_title:    settings.sermonTitle,
+      sermon_speaker:  settings.sermonSpeaker,
+      updated_at:      new Date().toISOString()
+    }).eq('id', 1);
+  }
+
+  async function loadPrayers() {
+    const { data } = await db.from('prayers').select('*').eq('is_approved', true).order('created_at', { ascending: false });
+    return data || [];
+  }
+
+  async function loadEvents() {
+    const { data } = await db.from('events').select('*').order('event_date', { ascending: true });
+    return data || [];
+  }
+
+  async function loadMembers() {
+    const { data } = await db.from('members').select('*').order('created_at', { ascending: true });
+    return data || [];
+  }
+
+  async function loadTestimonies() {
+    const { data } = await db.from('testimonies').select('*').eq('is_approved', true).order('created_at', { ascending: false });
+    return data || [];
+  }
+
+  // Override doLogin to use Supabase
+  async function doLogin() {
+    const e = document.getElementById('le').value.trim();
+    const p = document.getElementById('lp').value;
+    if (!e || !p) { toast('⚠️ Please fill in all fields'); return; }
+    toast('⏳ Signing in…');
+    const user = await signIn(e, p);
+    if (!user) return;
+    const admin = await checkIsAdmin(user.id);
+    const { data: member } = await db.from('members').select('*').eq('user_id', user.id).single();
+    const name  = member?.full_name || e.split('@')[0];
+    const dept  = member?.department || 'General Member';
+    const ini   = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    loginUser({ name, email: e, dept, initials: ini }, admin);
+    loadChurchSettings();
+  }
+
+  // Override doRegister to use Supabase
+  async function doRegister() {
+    const n = document.getElementById('rn').value.trim();
+    const e = document.getElementById('re').value.trim();
+    const p = document.getElementById('rp').value;
+    const d = document.getElementById('rd').value;
+    if (!n || !e || !p) { toast('⚠️ Fill all required fields'); return; }
+    if (p.length < 6)   { toast('⚠️ Password needs 6+ characters'); return; }
+    toast('⏳ Creating account…');
+    const user = await signUp(e, p, n, d);
+    if (!user) return;
+    const ini = n.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    loginUser({ name: n, email: e, dept: d, initials: ini }, false);
+  }
+
+  // Override saveSettings to also save to Supabase
+  const _origSave = window.saveSettings;
+  window.saveSettings = async function() {
+    settings.churchName    = document.getElementById('s-church-name').value || settings.churchName;
+    settings.appName       = document.getElementById('s-app-name').value    || settings.appName;
+    settings.slogan        = document.getElementById('s-slogan').value      || settings.slogan;
+    settings.phone         = document.getElementById('s-phone').value       || settings.phone;
+    settings.whatsapp      = document.getElementById('s-whatsapp').value    || settings.whatsapp;
+    settings.email         = document.getElementById('s-email').value       || settings.email;
+    settings.website       = document.getElementById('s-website').value     || settings.website;
+    settings.facebook      = document.getElementById('s-fb').value          || settings.facebook;
+    settings.instagram     = document.getElementById('s-ig').value          || settings.instagram;
+    settings.youtube       = document.getElementById('s-yt').value          || settings.youtube;
+    settings.sermonTitle   = document.getElementById('s-sermon-title').value || settings.sermonTitle;
+    settings.sermonSpeaker = document.getElementById('s-sermon-spk').value  || settings.sermonSpeaker;
+    try { localStorage.setItem('churchhub_s', JSON.stringify(settings)); } catch(e) {}
+    await saveChurchSettingsToDB();
+    applySettings();
+    closeSettings();
+    toast('✅ Settings saved to database!');
+  };
+
+  console.log('✅ Supabase connected!');
+</script>
+</body>
+</html>
