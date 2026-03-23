@@ -1,0 +1,20 @@
+# Cloudflare Pages / Netlify headers
+# Critical: sw.js must be served as JS with no-cache so updates deploy instantly
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Content-Type: application/javascript; charset=utf-8
+  Service-Worker-Allowed: /
+
+/manifest.json
+  Cache-Control: no-cache
+  Content-Type: application/manifest+json; charset=utf-8
+
+/icon-192.png
+  Cache-Control: public, max-age=86400
+
+/icon-512.png
+  Cache-Control: public, max-age=86400
+
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY

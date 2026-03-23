@@ -1,60 +1,47 @@
-// ChurchHub Service Worker — Offline Support
-const CACHE = 'churchhub-v1';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
+// ChurchHub Service Worker v9 — Cloudflare Pages optimised
+const CACHE = 'churchhub-v9';
 
-// Install — cache core assets
 self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(ASSETS))
-  );
+  // Skip waiting immediately — don't block on precache
   self.skipWaiting();
-});
-
-// Activate — clean old caches
-self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    caches.open(CACHE).then(c =>
+      Promise.allSettled([
+        c.add('./index.html'),
+        c.add('./manifest.json'),
+        c.add('./icon-192.png'),
+        c.add('./icon-512.png'),
+        c.add('./icon.svg')
+      ])
     )
   );
-  self.clients.claim();
 });
 
-// Fetch — serve from cache first, fall back to network
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(res => {
-        if (!res || res.status !== 200 || res.type !== 'basic') return res;
-        const copy = res.clone();
-        caches.open(CACHE).then(cache => cache.put(e.request, copy));
-        return res;
-      });
-    }).catch(() => caches.match('/index.html'))
-  );
-});
-
-// Push Notifications
-self.addEventListener('push', e => {
-  const data = e.data ? e.data.json() : {};
+self.addEventListener('activate', e => {
   e.waitUntil(
-    self.registration.showNotification(data.title || 'ChurchHub', {
-      body: data.body || 'New message from your church',
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
-      vibrate: [200, 100, 200],
-      data: { url: data.url || '/' }
-    })
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.filter(k => k !== CACHE).map(k => caches.delete(k))
+      ))
+      .then(() => self.clients.claim())
   );
 });
 
-// Notification click
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  e.waitUntil(clients.openWindow(e.notification.data.url || '/'));
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
+  // Only handle same-origin requests — let Supabase calls pass through untouched
+  if (url.hostname !== self.location.hostname) return;
+  e.respondWith(
+    fetch(e.request)
+      .then(res => {
+        if (res && res.status === 200 && res.type !== 'opaque') {
+          caches.open(CACHE).then(c => c.put(e.request, res.clone()));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request)
+        .then(r => r || caches.match('./index.html'))
+      )
+  );
 });
